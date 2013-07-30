@@ -18,7 +18,7 @@
     },
     "minimum-stability": "dev",
     "scripts": {
-        "post-create-project-cmd": [
+        "post-install-cmd": [
             "yii\\composer\\InstallHandler::setPermissions"
         ]
     },
