@@ -26,5 +26,453 @@ use Codeception\Module\CodeHelper;
 class CodeGuy extends \Codeception\AbstractGuy
 {
     
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $text
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeContainsText()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeContainsText($node, $text) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeContainsText', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $text
+     * @see Codeception\Module\CodeHelper::seeNodeContainsText()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeContainsText($node, $text) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeContainsText', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param $pattern $text
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeContainsPattern()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeContainsPattern($node, $pattern) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeContainsPattern', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param $pattern $text
+     * @see Codeception\Module\CodeHelper::seeNodeContainsPattern()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeContainsPattern($node, $pattern) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeContainsPattern', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeIsEmpty()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeIsEmpty($node) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeIsEmpty', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @see Codeception\Module\CodeHelper::seeNodeIsEmpty()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeIsEmpty($node) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeIsEmpty', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param mixed $cssClass
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeHasCssClass()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeHasCssClass($node, $cssClass) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeHasCssClass', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param mixed $cssClass
+     * @see Codeception\Module\CodeHelper::seeNodeHasCssClass()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeHasCssClass($node, $cssClass) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeHasCssClass', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param mixed $cssClass
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasCssClass()
+     * @return \Codeception\Maybe
+     */
+    public function cantSeeNodeHasCssClass($node, $cssClass) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('dontSeeNodeHasCssClass', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param mixed $cssClass
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasCssClass()
+     * @return \Codeception\Maybe
+     */
+    public function dontSeeNodeHasCssClass($node, $cssClass) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('dontSeeNodeHasCssClass', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $cssStyle
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeHasCssStyle()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeHasCssStyle($node, $cssStyle) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeHasCssStyle', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $cssStyle
+     * @see Codeception\Module\CodeHelper::seeNodeHasCssStyle()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeHasCssStyle($node, $cssStyle) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeHasCssStyle', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $cssStyle
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasCssStyle()
+     * @return \Codeception\Maybe
+     */
+    public function cantSeeNodeHasCssStyle($node, $cssStyle) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('dontSeeNodeHasCssStyle', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $cssStyle
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasCssStyle()
+     * @return \Codeception\Maybe
+     */
+    public function dontSeeNodeHasCssStyle($node, $cssStyle) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('dontSeeNodeHasCssStyle', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $name
+     * @param string $value
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeHasAttribute()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeHasAttribute($node, $name, $value = null) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeHasAttribute', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $name
+     * @param string $value
+     * @see Codeception\Module\CodeHelper::seeNodeHasAttribute()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeHasAttribute($node, $name, $value = null) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeHasAttribute', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $attributes
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeHasAttributes()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeHasAttributes($node, $attributes) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeHasAttributes', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $attributes
+     * @see Codeception\Module\CodeHelper::seeNodeHasAttributes()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeHasAttributes($node, $attributes) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeHasAttributes', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $elements
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::seeNodeHasChildren()
+     * @return \Codeception\Maybe
+     */
+    public function canSeeNodeHasChildren($node, $elements) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('seeNodeHasChildren', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $elements
+     * @see Codeception\Module\CodeHelper::seeNodeHasChildren()
+     * @return \Codeception\Maybe
+     */
+    public function seeNodeHasChildren($node, $elements) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('seeNodeHasChildren', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $elements
+    * Conditional Assertion: Test won't be stopped on fail
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasChildren()
+     * @return \Codeception\Maybe
+     */
+    public function cantSeeNodeHasChildren($node, $elements) {
+        $this->scenario->addStep(new \Codeception\Step\ConditionalAssertion('dontSeeNodeHasChildren', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $elements
+     * @see Codeception\Module\CodeHelper::dontSeeNodeHasChildren()
+     * @return \Codeception\Maybe
+     */
+    public function dontSeeNodeHasChildren($node, $elements) {
+        $this->scenario->addStep(new \Codeception\Step\Assertion('dontSeeNodeHasChildren', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
+
+ 
+    /**
+     * This method is generated.
+     * Documentation taken from corresponding module.
+     * ----------------------------------------------
+     *
+     * @param mixed $content
+     * @param string $selector
+     * @return \Symfony\Component\DomCrawler\Crawler
+     * @see Codeception\Module\CodeHelper::createNode()
+     * @return \Codeception\Maybe
+     */
+    public function createNode($content, $selector = null) {
+        $this->scenario->addStep(new \Codeception\Step\Action('createNode', func_get_args()));
+        if ($this->scenario->running()) {
+            $result = $this->scenario->runStep();
+            return new Maybe($result);
+        }
+        return new Maybe();
+    }
 }
 

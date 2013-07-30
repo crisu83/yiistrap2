@@ -1,7 +1,7 @@
 <?php
 use Codeception\Util\Stub;
 
-class HtmlTest extends \Codeception\TestCase\Test
+class ArrayHelperTest extends \Codeception\TestCase\Test
 {
    /**
     * @var \CodeGuy
