@@ -14,7 +14,7 @@ namespace yiistrap\helpers;
  * @author Christoffer Niska <christoffer.niska@gmail.com>
  * @since 2.0.0
  */
-class Html extends \yii\helpers\HtmlBase
+class ArrayHelper extends \yii\helpers\ArrayHelperBase
 {
 
 }
