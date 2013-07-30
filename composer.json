@@ -27,5 +27,10 @@
         "yii-install-writable": [
             "tests/_log"
         ]
+    },
+    "autoload": {
+        "psr-0": {
+            "yiistrap\\": "./"
+        }
     }
 }
