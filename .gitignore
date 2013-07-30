@@ -1,0 +1,24 @@
+# project files
+.idea
+nbproject
+
+# mac deployment helpers
+switch
+
+# node modules
+node_modules
+
+# composer files
+composer.phar
+vendor/*
+
+# Codeception files
+codecept.phar
+tests/_log/*
+tests/acceptance/*
+tests/functional/*
+tests/acceptance.suite.yml
+tests/functional.suite.yml
+
+# releases
+releases/
