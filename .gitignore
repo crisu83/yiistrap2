@@ -15,6 +15,7 @@ vendor/*
 
 # Codeception files
 codecept.phar
+tests/_data/*
 tests/_log/*
 tests/acceptance/*
 tests/functional/*
