@@ -1,16 +1,12 @@
 <?php
 
-defined('YII_DEBUG') or define('YII_DEBUG', true);
-
-defined('YII_ENV') or define('YII_ENV', 'test');
+define('YII_ENABLE_ERROR_HANDLER', false);
+define('YII_DEBUG', true);
+$_SERVER['SCRIPT_NAME'] = '/' . __DIR__;
+$_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
 require_once(__DIR__ . '/../vendor/yiisoft/yii2/yii/Yii.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 Yii::importNamespaces(require(__DIR__ . '/../vendor/composer/autoload_namespaces.php'));
 
-new yii\web\Application(
-    array(
-        'id' => 'bootstrap',
-        'basePath' => dirname(__DIR__),
-    )
-);
+require_once(__DIR__ . '/unit/TestCase.php');

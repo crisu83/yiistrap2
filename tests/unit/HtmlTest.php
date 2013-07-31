@@ -1,7 +1,8 @@
 <?php
-use Codeception\Util\Stub;
 
-class HtmlTest extends \Codeception\TestCase\Test
+use yiistrapunit\TestCase;
+
+class HtmlTest extends TestCase
 {
    /**
     * @var \CodeGuy
@@ -10,10 +11,7 @@ class HtmlTest extends \Codeception\TestCase\Test
 
     protected function _before()
     {
-    }
-
-    protected function _after()
-    {
+        $this->mockApplication();
     }
 
     // tests
