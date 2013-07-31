@@ -1,9 +1,9 @@
 <?php
-use Codeception\Util\Stub;
 
+use yiistrapunit\TestCase;
 use yiistrap\helpers\ArrayHelper;
 
-class ArrayHelperTest extends \Codeception\TestCase\Test
+class ArrayHelperTest extends TestCase
 {
    /**
     * @var \CodeGuy
@@ -23,6 +23,11 @@ class ArrayHelperTest extends \Codeception\TestCase\Test
         $array = array('key' => 'value');
         $this->assertEquals('value', ArrayHelper::popValue($array, 'key'));
         $this->assertArrayNotHasKey('key', $array);
+
+        $object = new stdClass();
+        $object->key = 'value';
+        $this->assertEquals('value', ArrayHelper::popValue($object, 'key'));
+        $this->assertObjectNotHasAttribute('key', $object);
     }
 
     public function testDefaultValue()
@@ -32,6 +37,12 @@ class ArrayHelperTest extends \Codeception\TestCase\Test
         $this->assertEquals('default', ArrayHelper::getValue($array, 'key'));
         ArrayHelper::defaultValue($array, 'key', 'value');
         $this->assertEquals('default', ArrayHelper::getValue($array, 'key'));
+
+        $object = new stdClass();
+        ArrayHelper::defaultValue($object, 'key', 'default');
+        $this->assertEquals('default', ArrayHelper::getValue($object, 'key'));
+        ArrayHelper::defaultValue($object, 'key', 'value');
+        $this->assertEquals('default', ArrayHelper::getValue($object, 'key'));
     }
 
     public function testDefaultValues()

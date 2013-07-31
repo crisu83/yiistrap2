@@ -13,11 +13,4 @@ class HtmlTest extends TestCase
     {
         $this->mockApplication();
     }
-
-    // tests
-    public function testMe()
-    {
-
-    }
-
 }
