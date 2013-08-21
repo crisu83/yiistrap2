@@ -14,7 +14,7 @@ namespace yiistrap\helpers;
  * @author Christoffer Niska <christoffer.niska@gmail.com>
  * @since 2.0.0
  */
-class ArrayHelper extends \yii\helpers\ArrayHelper
+class ArrayHelper extends \yii\helpers\ArrayHelperBase
 {
     /**
      * Removes and returns a specific value from the given array (or the default value if not set).
