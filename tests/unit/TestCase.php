@@ -1,26 +1,18 @@
 <?php
 
-namespace yiistrapunit;
+namespace yiistrap\tests\unit;
 
-class TestCase extends \Codeception\TestCase\Test
+use yii\codeception\TestCase as BaseTestCase;
+
+class TestCase extends BaseTestCase
 {
-    protected function _after()
+    protected function _before()
     {
-        $this->destroyApplication();
-    }
-
-    protected function mockApplication($config = array(), $appClass = '\yii\console\Application')
-    {
-        static $defaultConfig = array(
-            'id' => 'testapp',
-            'basePath' => __DIR__,
+        $this->appConfig = array(
+            'id' => 'yiistrap-test',
+            'basePath' => dirname(__DIR__),
+            'class' => \yii\console\Application::className(),
         );
-
-        new $appClass(array_merge($defaultConfig, $config));
+        $this->mockApplication();
     }
-
-    protected function destroyApplication()
-    {
-        \Yii::$app = null;
-    }
-}
+} 

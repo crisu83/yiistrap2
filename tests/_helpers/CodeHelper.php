@@ -7,7 +7,7 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param string $text
      */
-    public function seeNodeContainsText($node, $text)
+    public function seeNodeText($node, $text)
     {
         $this->assertTrue(strpos($node->text(), $text) !== false);
     }
@@ -16,7 +16,7 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param $pattern $text
      */
-    public function seeNodeContainsPattern($node, $pattern)
+    public function seeNodePattern($node, $pattern)
     {
         $this->assertEquals(1, preg_match($pattern, $node->html()));
     }
@@ -24,7 +24,7 @@ class CodeHelper extends \Codeception\Module
     /**
      * @param \Symfony\Component\DomCrawler\Crawler $node
      */
-    public function seeNodeIsEmpty($node)
+    public function seeNodeEmpty($node)
     {
         $this->assertEquals('', $node->text());
     }
@@ -33,7 +33,7 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param mixed $cssClass
      */
-    public function seeNodeHasCssClass($node, $cssClass)
+    public function seeNodeCssClass($node, $cssClass)
     {
         if (is_string($cssClass)) {
             $cssClass = explode(' ', $cssClass);
@@ -47,7 +47,7 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param mixed $cssClass
      */
-    public function dontSeeNodeHasCssClass($node, $cssClass)
+    public function dontSeeNodeCssClass($node, $cssClass)
     {
         if (is_string($cssClass)) {
             $cssClass = explode(' ', $cssClass);
@@ -61,7 +61,7 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param string $cssStyle
      */
-    public function seeNodeHasCssStyle($node, $cssStyle)
+    public function seeNodeCssStyle($node, $cssStyle)
     {
         if (is_string($cssStyle)) {
             $cssStyle = explode(';', rtrim($cssStyle, ';'));
@@ -69,21 +69,6 @@ class CodeHelper extends \Codeception\Module
         $cssStyle = $this->normalizeCssStyle($cssStyle);
         foreach ($cssStyle as $style) {
             $this->assertTrue(strpos($node->attr('style'), $style) !== false);
-        }
-    }
-
-    /**
-     * @param \Symfony\Component\DomCrawler\Crawler $node
-     * @param string $cssStyle
-     */
-    public function dontSeeNodeHasCssStyle($node, $cssStyle)
-    {
-        if (is_string($cssStyle)) {
-            $cssStyle = explode(';', rtrim($cssStyle, ';'));
-        }
-        $cssStyle = $this->normalizeCssStyle($cssStyle);
-        foreach ($cssStyle as $style) {
-            $this->assertFalse(strpos($node->attr('style'), $style));
         }
     }
 
@@ -104,10 +89,25 @@ class CodeHelper extends \Codeception\Module
 
     /**
      * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param string $cssStyle
+     */
+    public function dontSeeNodeCssStyle($node, $cssStyle)
+    {
+        if (is_string($cssStyle)) {
+            $cssStyle = explode(';', rtrim($cssStyle, ';'));
+        }
+        $cssStyle = $this->normalizeCssStyle($cssStyle);
+        foreach ($cssStyle as $style) {
+            $this->assertFalse(strpos($node->attr('style'), $style));
+        }
+    }
+
+    /**
+     * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param string $name
      * @param string $value
      */
-    public function seeNodeHasAttribute($node, $name, $value = null)
+    public function seeNodeAttribute($node, $name, $value = null)
     {
         $attr = $node->attr($name);
         $this->assertTrue($attr !== null);
@@ -118,12 +118,32 @@ class CodeHelper extends \Codeception\Module
 
     /**
      * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $name
+     */
+    public function dontSeeNodeAttribute($node, $name)
+    {
+        $this->assertEquals('', $node->attr($name));
+    }
+
+    /**
+     * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param array $attributes
      */
-    public function seeNodeHasAttributes($node, array $attributes)
+    public function seeNodeAttributes($node, array $attributes)
     {
         foreach ($attributes as $name => $value) {
-            $this->seeNodeHasAttribute($node, $name, $value);
+            $this->seeNodeAttribute($node, $name, $value);
+        }
+    }
+
+    /**
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param array $attributes
+     */
+    public function dontSeeNodeAttributes($node, array $attributes)
+    {
+        foreach ($attributes as $name) {
+            $this->dontSeeNodeAttribute($node, $name);
         }
     }
 
@@ -131,11 +151,13 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param array $elements
      */
-    public function seeNodeHasChildren($node, array $elements)
+    public function seeNodeChildren($node, array $elements)
     {
         /** @var \DomElement $child */
         foreach ($node->children() as $i => $child) {
-            $this->assertTrue($this->nodeMatchesCssSelector($child, $elements[$i]));
+            if (isset($elements[$i])) {
+                $this->assertTrue($this->nodeMatchesCssSelector($child, $elements[$i]));
+            }
         }
     }
 
@@ -143,12 +165,24 @@ class CodeHelper extends \Codeception\Module
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param array $elements
      */
-    public function dontSeeNodeHasChildren($node, array $elements)
+    public function dontSeeNodeChildren($node, array $elements)
     {
         /** @var \DomElement $child */
         foreach ($node->children() as $i => $child) {
-            $this->assertFalse($this->nodeMatchesCssSelector($child, $elements[$i]));
+            if (isset($elements[$i])) {
+                $this->assertFalse($this->nodeMatchesCssSelector($child, $elements[$i]));
+            }
         }
+    }
+
+    /**
+     * @param \Symfony\Component\DomCrawler\Crawler $node
+     * @param integer $amount
+     */
+    public function seeNodeNumChildren($node, $amount, $filter = null)
+    {
+        $count = $filter !== null ? $node->filter($filter)->count() : $node->children()->count();
+        $this->assertEquals($amount, $count);
     }
 
     /**
@@ -167,15 +201,14 @@ class CodeHelper extends \Codeception\Module
 
     /**
      * @param mixed $content
-     * @param string $selector
+     * @param string $filter
      * @return \Symfony\Component\DomCrawler\Crawler
      */
-    public function createNode($content, $selector = null)
+    public function createNode($content, $filter = null)
     {
-        $crawler = new \Symfony\Component\DomCrawler\Crawler;
-        $crawler->add($content);
-        if ($selector !== null) {
-            $node = $crawler->filter($selector);
+        $crawler = new \Symfony\Component\DomCrawler\Crawler($content);
+        if ($filter !== null) {
+            $node = $crawler->filter($filter);
             $this->assertNotEquals(null, $node);
             return $node;
         }

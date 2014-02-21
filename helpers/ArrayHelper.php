@@ -2,7 +2,7 @@
 /*
  * This file is part of Yiistrap.
  *
- * (c) 2013 Christoffer Niska
+ * (c) 2014 Christoffer Niska
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace yiistrap\helpers;
  * @author Christoffer Niska <christoffer.niska@gmail.com>
  * @since 2.0.0
  */
-class ArrayHelper extends \yii\helpers\ArrayHelperBase
+class ArrayHelper extends \yii\helpers\ArrayHelper
 {
     /**
      * Removes and returns a specific value from the given array (or the default value if not set).
@@ -25,7 +25,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
      */
     public static function popValue(&$array, $key, $default = null)
     {
-        $value = self::getValue($array, $key, $default);
+        $value = static::getValue($array, $key, $default);
         if (is_array($array)) {
             unset($array[$key]);
         } else {
@@ -46,10 +46,8 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
             if (!isset($array[$key])) {
                 $array[$key] = $value;
             }
-        } else {
-            if (!isset($array->$key)) {
-                $array->$key = $value;
-            }
+        } else if (!isset($array->$key)) {
+            $array->$key = $value;
         }
     }
 
@@ -61,7 +59,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
     public static function defaultValues(&$array, array $values)
     {
         foreach ($values as $name => $value) {
-            self::defaultValue($array, $name, $value);
+            static::defaultValue($array, $name, $value);
         }
     }
 
@@ -73,7 +71,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
     public static function removeValues(array &$array, array $keys)
     {
         foreach ($keys as $key) {
-            self::remove($array, $key);
+            static::remove($array, $key);
         }
     }
 
@@ -88,10 +86,8 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
     public static function copyValues(array $keys, array $from, array $to, $force = false)
     {
         foreach ($keys as $key) {
-            if (isset($from[$key])) {
-                if ($force || !isset($to[$key])) {
-                    $to[$key] = self::getValue($from, $key);
-                }
+            if (isset($from[$key]) && ($force || !isset($to[$key]))) {
+                $to[$key] = static::getValue($from, $key);
             }
         }
         return $to;
@@ -109,10 +105,10 @@ class ArrayHelper extends \yii\helpers\ArrayHelperBase
     {
         foreach ($keys as $key) {
             if (isset($from[$key])) {
-                $value = self::popValue($from, $key);
+                $value = static::popValue($from, $key);
                 if ($force || !isset($to[$key])) {
                     $to[$key] = $value;
-                    self::remove($from, $key);
+                    static::remove($from, $key);
                 }
             }
         }
