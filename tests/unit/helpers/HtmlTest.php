@@ -350,6 +350,12 @@ class HtmlTest extends TestCase
         $body = $jumbotron->filter('.body');
         $I->seeNodeText($body, 'Lorem');
         $I->seeNodeCssClass($body, 'body');
+
+        // full width
+        $html = Html::jumbotron('<h1>Hello, world!</h1>', ['fullWidth' => true]);
+        $jumbotron = $I->createNode($html, 'div.jumbotron');
+        $container = $jumbotron->filter('div.container');
+        $I->seeNodeText($container, 'Hello, world!');
     }
 
     public function testPageHeader()
@@ -389,9 +395,11 @@ class HtmlTest extends TestCase
         $html = Html::thumbnail(
             [
                 'url' => 'http://getyiistrap.com/',
-                'src' => 'http://getyiistrap.com/thumbnail.png',
                 'image' => [
-                    'alt' => 'Alternative text',
+                    'src' => 'http://getyiistrap.com/thumbnail.png',
+                    'options' => [
+                        'alt' => 'Alternative text',
+                    ],
                 ],
             ]
         );
@@ -409,7 +417,9 @@ class HtmlTest extends TestCase
         // custom thumbnail
         $html = Html::thumbnail(
             [
-                'src' => 'http://getyiistrap.com/thumbnail.png',
+                'image' => [
+                    'src' => 'http://getyiistrap.com/thumbnail.png',
+                ],
                 'label' => [
                     'tag' => 'h5',
                     'content' => 'Thumbnail label',

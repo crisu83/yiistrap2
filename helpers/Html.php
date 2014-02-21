@@ -216,7 +216,7 @@ class Html extends \yii\helpers\Html
     const ICON_CLOUD_UPLOAD = 'cloud-upload';
     const ICON_TREE_CONIFER = 'tree-conifer';
     const ICON_TREE_DECIDUOUS = 'tree-deciduous';
-    
+
     /**
      * @param string $type
      * @param array $options
@@ -225,8 +225,8 @@ class Html extends \yii\helpers\Html
      */
     public static function icon($type, array $options = [])
     {
-        Html::addCssClass($options, 'glyphicon glyphicon-' . $type);
-        return Html::tag(ArrayHelper::popValue($options, 'tag', 'span'), '', $options);
+        static::addCssClass($options, 'glyphicon glyphicon-' . $type);
+        return static::tag(ArrayHelper::popValue($options, 'tag', 'span'), '', $options);
     }
 
     /**
@@ -287,25 +287,7 @@ class Html extends \yii\helpers\Html
         } else {
             $item = ['content' => $item];
         }
-        return static::renderContent($item, ['tag' => 'li']);
-    }
-
-    /**
-     * @param array $items
-     */
-    protected static function normalizeItems(array &$items)
-    {
-        foreach ($items as &$item) {
-            if (is_array($item)) {
-                $item = function($item, $index) {
-                    return static::a(
-                        $item['label'],
-                        ArrayHelper::popValue($item, 'url'),
-                        ArrayHelper::popValue($item, 'options', [])
-                    );
-                };
-            }
-        }
+        return static::tag('li', $item['content'], ArrayHelper::popValue($item, 'itemOptions', []));
     }
 
     const LABEL_DEFAULT = 'default';
@@ -354,13 +336,21 @@ class Html extends \yii\helpers\Html
     public static function jumbotron($content, array $options = [])
     {
         if (is_array($content)) {
-            $content = static::renderContent(
-                    ArrayHelper::popValue($content, 'heading'),
-                    ['tag' => 'h1']
-                ) . static::renderContent(
-                    ArrayHelper::popValue($content, 'body'),
-                    ['tag' => 'p']
-                );
+            $content = static::content(
+                $content,
+                [
+                    'heading' => [
+                        'tag' => 'h1',
+                    ],
+                    'body' => [
+                        'tag' => 'p'
+                    ],
+                ]
+            );
+        }
+
+        if (ArrayHelper::popValue($options, 'fullWidth', false)) {
+            $content = static::tag('div', $content, ['class' => 'container']);
         }
 
         static::addCssClass($options, 'jumbotron');
@@ -371,9 +361,7 @@ class Html extends \yii\helpers\Html
      * @param string|array $content
      *
      * When passed as array:
-     * - heading: string
-     * - headingOptions: array
-     * - headingTag: string
+     * - heading: string|array
      * - subtext: string
      *
      * @param array $options
@@ -383,15 +371,18 @@ class Html extends \yii\helpers\Html
     public static function pageHeader($content, array $options = [])
     {
         if (is_array($content)) {
-            if (isset($content['subtext'])) {
-                $content['heading']['content'] .= ' ' . static::tag(
-                        'small',
-                        ArrayHelper::popValue($content, 'subtext')
-                    );
-            }
-            $content = static::renderContent(
-                ArrayHelper::popValue($content, 'heading'),
-                ['tag' => 'h1']
+            $content = static::content(
+                $content,
+                [
+                    'heading' => [
+                        'tag' => 'h1',
+                        'append' => [
+                            'subtext' => [
+                                'tag' => 'small',
+                            ],
+                        ],
+                    ],
+                ]
             );
         }
 
@@ -417,45 +408,41 @@ class Html extends \yii\helpers\Html
      */
     public static function thumbnail($content, array $options = [])
     {
-        $img = static::img(
-            ArrayHelper::popValue($content, 'src'),
-            ArrayHelper::popValue($content, 'image', [])
+        $image = static::parseElement(
+            'image',
+            $content,
+            [
+                'tag' => 'img',
+                'src' => '',
+            ]
         );
+        $image = static::img($image['src'], $image['options']);
 
         if (isset($content['url'])) {
             $options['href'] = static::url(ArrayHelper::popValue($content, 'url', '#'));
+            $content = $image;
             $tagName = ArrayHelper::popValue($options, 'tag', 'a');
-            $content = $img;
         } else {
             if (isset($content['caption'])) {
-                $caption = ArrayHelper::popValue($content, 'caption', '');
-                if (!is_array($caption)) {
-                    $caption = ['content' => $caption];
-                }
-                ArrayHelper::defaultValues(
-                    $caption,
+                $caption = static::parseElement(
+                    'caption',
+                    $content,
                     [
-                        'content' => '',
-                        'options' => []
+                        'prepend' => [
+                            'label' => [
+                                'tag' => 'h3',
+                            ]
+                        ],
                     ]
                 );
-                ArrayHelper::defaultValue($caption, 'options', []);
                 static::addCssClass($caption['options'], 'caption');
-
-                if (isset($content['label'])) {
-                    $caption['content'] = static::renderContent(
-                        ArrayHelper::popValue($content, 'label'),
-                        ['tag' => 'h3']
-                    ) . $caption['content'];
-                }
-
-                $caption = static::renderContent($caption, ['tag' => 'div']);
+                $caption = static::renderElement($caption);
             } else {
                 $caption = '';
             }
 
+            $content = $image . $caption;
             $tagName = ArrayHelper::popValue($options, 'tag', 'div');
-            $content = $img . $caption;
         }
 
         static::addCssClass($options, 'thumbnail');
@@ -480,26 +467,22 @@ class Html extends \yii\helpers\Html
     public static function alert($content, $type = self::ALERT_SUCCESS, array $options = [])
     {
         if (is_array($content)) {
-            if (isset($content['closeButton'])) {
-                $closeButton = ArrayHelper::popValue($content, 'closeButton', '');
-                if (!is_array($closeButton)) {
-                    $closeButton = ['content' => $closeButton];
-                }
-                ArrayHelper::defaultValues(
-                    $closeButton,
-                    [
-                        'content' => '&times;',
-                        'options' => []
-                    ]
-                );
-                $closeButton = static::alertCloseButton(
-                    $closeButton['content'],
-                    $closeButton['options']
-                );
-            } else {
-                $closeButton = '';
-            }
-            $content = $closeButton . ArrayHelper::popValue($content, 'body', '');
+            $body = static::parseElement(
+                'body',
+                $content,
+                [
+                    'prepend' => [
+                        'closeButton' => [
+                            'content' => '&times;',
+                        ],
+                    ],
+                ]
+            );
+            $closeButton = static::alertCloseButton(
+                $body['prepend']['closeButton']['content'],
+                $body['prepend']['closeButton']['options']
+            );
+            $content = $closeButton . $body['content'];
         }
 
         static::addCssClass($options, 'alert alert-' . $type);
@@ -530,7 +513,7 @@ class Html extends \yii\helpers\Html
     /**
      * @param string $content
      * @param array $options
-     * 
+     *
      * @return string
      */
     protected static function closeButton($content = '&times;', array $options = [])
@@ -555,38 +538,107 @@ class Html extends \yii\helpers\Html
 
     /**
      * @param string|array $content
+     * @param array $structure
      *
-     * When passed an array:
-     * - tag: string
-     * - content: string
-     * - options: array
+     * @return array
+     */
+    public static function parseContent($content, array $structure = [])
+    {
+        $result = [];
+        foreach ($structure as $name => $element) {
+            $result[$name] = static::parseElement($name, $content, $structure[$name]);
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $name
+     * @param string|array $content
+     * @param array $structure
      *
+     * @return array
+     */
+    public static function parseElement($name, $content, array $structure = [])
+    {
+        if (isset($content[$name])) {
+            $element = is_array($content[$name]) ? $content[$name] : ['content' => $content[$name]];
+        } else {
+            $element = [];
+        }
+
+        $element = static::normalizeElement($element, $structure);
+
+        if (!empty($structure['prepend'])) {
+            $element['prepend'] = static::parseContent($content, $structure['prepend']);
+        }
+        if (!empty($structure['append'])) {
+            $element['append'] = static::parseContent($content, $structure['append']);
+        }
+
+        return $element;
+    }
+
+    /**
+     * @param array $element
      * @param array $defaults
      *
-     * - tag: string
-     * - content: string
-     * - options: array
-     *
-     * @return string
+     * @return array
      */
-    protected static function renderContent($content, array $defaults = [])
+    public static function normalizeElement(array $element, array $defaults = [])
     {
-        $defaults = array_merge(
+        return array_merge(
             [
                 'tag' => 'div',
                 'content' => '',
                 'options' => [],
+                'prepend' => [],
+                'append' => [],
             ],
-            $defaults
+            $defaults,
+            $element
         );
-        if (is_array($content)) {
-            return static::tag(
-                ArrayHelper::popValue($content, 'tag', $defaults['tag']),
-                ArrayHelper::popValue($content, 'content', $defaults['content']),
-                ArrayHelper::popValue($content, 'options', $defaults['options'])
-            );
-        } else {
-            return static::tag($defaults['tag'], $content);
+    }
+
+    /**
+     * @param array $content
+     *
+     * @return string
+     */
+    public static function renderContent(array $content)
+    {
+        $result = [];
+        foreach ($content as $element) {
+            $result[] = static::renderElement($element);
         }
+        return implode(' ', $result);
+    }
+
+    /**
+     * @param array $element
+     *
+     * - tag: string
+     * - content: string
+     * - options: array
+     * - prepend: array
+     * - append: array
+     *
+     * @return string
+     */
+    public static function renderElement(array $element)
+    {
+        $prepend = !empty($element['prepend']) ? static::renderContent($element['prepend']) . ' ' : '';
+        $append = !empty($element['append']) ? ' ' . static::renderContent($element['append']) : '';
+        return static::tag($element['tag'], $prepend . $element['content'] . $append, $element['options']);
+    }
+
+    /**
+     * @param string|array $content
+     * @param array $structure
+     *
+     * @return string
+     */
+    protected static function content($content, array $structure = [])
+    {
+        return static::renderContent(static::parseContent($content, $structure));
     }
 }
