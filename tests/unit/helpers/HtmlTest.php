@@ -261,18 +261,23 @@ class HtmlTest extends TestCase
 
         $html = Html::pagination(
             [
-                ['label' => '1', 'url' => 'http://getyiistrap.com/home/1'],
-                ['label' => '2', 'url' => 'http://getyiistrap.com/home/2'],
-                ['label' => '3', 'url' => 'http://getyiistrap.com/home/3'],
+                ['label' => '1', 'url' => 'http://getyiistrap.com/home/1', 'active' => true],
+                ['label' => '2'],
+                ['label' => '3', 'url' => 'http://getyiistrap.com/home/3', 'disabled' => true],
+            ],
+            [
+                'size' => Html::PAGINATION_LG,
             ]
         );
-        $pagination = $I->createNode($html, 'ul.pagination');
-        $I->seeNodeChildren($pagination, ['li', 'li', 'li']);
+        $pagination = $I->createNode($html, 'ul.pagination.pagination-lg');
+        $I->seeNodeChildren($pagination, ['li', 'li > span', 'li']);
         $items = $pagination->filter('li');
-        $first = $items->first()->filter('a');
-        $I->seeNodeText($first, '1');
-        $last = $items->last()->filter('a');
-        $I->seeNodeText($last, '3');
+        $first = $items->first();
+        $I->seeNodeCssClass($first, 'active');
+        $I->seeNodeText($first->filter('a'), '1');
+        $last = $items->last();
+        $I->seeNodeCssClass($last, 'disabled');
+        $I->seeNodeText($last->filter('a'), '3');
     }
 
     public function testPager()
@@ -298,10 +303,14 @@ class HtmlTest extends TestCase
     {
         $I = $this->codeGuy;
 
-        $html = Html::labelTb('Primary', Html::LABEL_PRIMARY, ['class' => 'test']);
+        $html = Html::labelTb(
+            'Primary',
+            [
+                'type' => Html::LABEL_PRIMARY,
+            ]
+        );
         $label = $I->createNode($html, 'span');
         $I->seeNodeCssClass($label, 'label label-primary');
-        $I->seeNodeCssClass($label, 'test');
         $I->seeNodeText($label, 'Primary');
 
         $html = Html::labelTb(Html::icon(Html::ICON_INBOX) . ' Inbox');

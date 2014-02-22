@@ -67,16 +67,32 @@ class ArrayHelperTest extends TestCase
         $this->assertEquals($a, $array);
     }
 
-    public function testMoveValues()
+    public function testMoveValue()
     {
         $a = array('key' => 'value');
         $b = array();
-        $array = ArrayHelper::moveValues(array('key'), $a, $b);
+        ArrayHelper::moveValue('key', $a, $b);
         $this->assertArrayNotHasKey('key', $a);
-        $this->assertEquals('value', ArrayHelper::getValue($array, 'key'));
+        $this->assertEquals('value', ArrayHelper::getValue($b, 'key'));
         $a = array('key' => 'value');
         $b = array('key' => 'other');
-        $array = ArrayHelper::moveValues(array('key'), $a, $b, true);
-        $this->assertEquals('value', ArrayHelper::getValue($array, 'key'));
+        ArrayHelper::moveValue('key', $a, $b, true);
+        $this->assertEquals('value', ArrayHelper::getValue($b, 'key'));
+    }
+
+    public function testMoveValues()
+    {
+        $a = array('key' => 'iron', 'door' => 'wooden');
+        $b = array();
+        ArrayHelper::moveValues(array('key', 'door'), $a, $b);
+        $this->assertArrayNotHasKey('key', $a);
+        $this->assertArrayNotHasKey('door', $a);
+        $this->assertEquals('iron', ArrayHelper::getValue($b, 'key'));
+        $this->assertEquals('wooden', ArrayHelper::getValue($b, 'door'));
+        $a = array('key' => 'iron', 'door' => 'wooden');
+        $b = array('key' => 'steel', 'door' => 'glass');
+        ArrayHelper::moveValues(array('key', 'door'), $a, $b, true);
+        $this->assertEquals('iron', ArrayHelper::getValue($b, 'key'));
+        $this->assertEquals('wooden', ArrayHelper::getValue($b, 'door'));
     }
 }

@@ -12,6 +12,7 @@ namespace yiistrap\helpers;
 
 /**
  * @author Christoffer Niska <christoffer.niska@gmail.com>
+ * @author Christoffer Lindqvist <christoffer.lindqvist@nordsoftware.com>
  * @since 2.0.0
  */
 class Html extends \yii\helpers\Html
@@ -242,6 +243,9 @@ class Html extends \yii\helpers\Html
         return static::ol($items, $options);
     }
 
+    const PAGINATION_LG = 'lg';
+    const PAGINATION_SM = 'sm';
+
     /**
      * @param array $items
      * @param array $options
@@ -250,9 +254,9 @@ class Html extends \yii\helpers\Html
      */
     public static function pagination(array $items, array $options = [])
     {
-        // todo: add support for size and alignment
         $options['item'] = array('static', 'renderItem');
         static::addCssClass($options, 'pagination');
+        static::addCssClassWithSuffix($options, 'pagination', ArrayHelper::popValue($options, 'size'));
         return static::ul($items, $options);
     }
 
@@ -264,8 +268,16 @@ class Html extends \yii\helpers\Html
      */
     public static function pager(array $items, array $options = [])
     {
-        // todo: add support for alignment
-        $options['item'] = array('static', 'renderItem');
+        $options['item'] = function($item, $index) {
+            ArrayHelper::defaultValue($item, 'itemOptions', []);
+            if (ArrayHelper::popValue($item, 'previous')) {
+                static::addCssClass($item['itemOptions'], 'previous');
+            }
+            if (ArrayHelper::popValue($item, 'next')) {
+                static::addCssClass($item['itemOptions'], 'next');
+            }
+            return static::renderItem($item, $index);
+        };
         static::addCssClass($options, 'pager');
         return static::ul($items, $options);
     }
@@ -279,11 +291,26 @@ class Html extends \yii\helpers\Html
     protected static function renderItem($item, $index)
     {
         if (is_array($item)) {
-            $item['content'] = static::a(
-                $item['label'],
-                ArrayHelper::popValue($item, 'url'),
-                ArrayHelper::popValue($item, 'options', [])
-            );
+            ArrayHelper::defaultValue($item, 'itemOptions', []);
+            if (ArrayHelper::popValue($item, 'active')) {
+                static::addCssClass($item['itemOptions'], 'active');
+            }
+            if (ArrayHelper::popValue($item, 'disabled')) {
+                static::addCssClass($item['itemOptions'], 'disabled');
+            }
+            if (isset($item['url'])) {
+                $item['content'] = static::a(
+                    ArrayHelper::popValue($item, 'label'),
+                    ArrayHelper::popValue($item, 'url'),
+                    ArrayHelper::popValue($item, 'options', [])
+                );
+            } else {
+                $item['content'] = static::tag(
+                    'span',
+                    ArrayHelper::popValue($item, 'label'),
+                    ArrayHelper::popValue($item, 'options', [])
+                );
+            }
         } else {
             $item = ['content' => $item];
         }
@@ -298,16 +325,17 @@ class Html extends \yii\helpers\Html
     const LABEL_DANGER = 'danger';
 
     /**
-     * @param string $text
-     * @param string $type
+     * @param string $content
      * @param array $options
+     * - type: string
      *
      * @return string
      */
-    public static function labelTb($text, $type = self::LABEL_DEFAULT, array $options = [])
+    public static function labelTb($content, array $options = [])
     {
-        Html::addCssClass($options, 'label label-' . $type);
-        return Html::tag(ArrayHelper::popValue($options, 'tag', 'span'), $text, $options);
+        static::addCssClass($options, 'label');
+        static::addCssClassWithSuffix($options, 'label', ArrayHelper::popValue($options, 'type', self::LABEL_DEFAULT));
+        return static::tag(ArrayHelper::popValue($options, 'tag', 'span'), $content, $options);
     }
 
     /**
@@ -392,15 +420,11 @@ class Html extends \yii\helpers\Html
 
     /**
      * @param array $content
-     *
-     * - src: string
      * - url: string|array
-     * - imageOptions: array
-     * - caption: string
-     * - captionOptions: array
-     * - label: string
-     * - labelOptions: array
-     * - labelTag: string
+     * - image: array
+     *   - src: string|array
+     * - caption: string|array
+     * - label: string|array
      *
      * @param array $options
      *
@@ -408,40 +432,36 @@ class Html extends \yii\helpers\Html
      */
     public static function thumbnail($content, array $options = [])
     {
-        $image = static::parseElement(
+        $image = static::element(
             'image',
             $content,
             [
-                'tag' => 'img',
                 'src' => '',
+                'formatter' => function ($content, $element) {
+                    return static::img($element['src'], $element['options']);
+                },
+                'allowEmpty' => true,
             ]
         );
-        $image = static::img($image['src'], $image['options']);
 
         if (isset($content['url'])) {
             $options['href'] = static::url(ArrayHelper::popValue($content, 'url', '#'));
             $content = $image;
             $tagName = ArrayHelper::popValue($options, 'tag', 'a');
         } else {
-            if (isset($content['caption'])) {
-                $caption = static::parseElement(
-                    'caption',
-                    $content,
-                    [
-                        'prepend' => [
-                            'label' => [
-                                'tag' => 'h3',
-                            ]
-                        ],
-                    ]
-                );
-                static::addCssClass($caption['options'], 'caption');
-                $caption = static::renderElement($caption);
-            } else {
-                $caption = '';
-            }
-
-            $content = $image . $caption;
+            $caption = static::parseElement(
+                'caption',
+                $content,
+                [
+                    'prepend' => [
+                        'label' => [
+                            'tag' => 'h3',
+                        ]
+                    ],
+                ]
+            );
+            static::addCssClass($caption['options'], 'caption');
+            $content = $image . static::renderElement($caption);
             $tagName = ArrayHelper::popValue($options, 'tag', 'div');
         }
 
@@ -460,32 +480,32 @@ class Html extends \yii\helpers\Html
      * When passed an array:
      * - body: string
      *
-     * @param string $type
      * @param array $options
+     * - type: string
+     *
      * @return string
      */
-    public static function alert($content, $type = self::ALERT_SUCCESS, array $options = [])
+    public static function alert($content, array $options = [])
     {
         if (is_array($content)) {
-            $body = static::parseElement(
+            $content = static::element(
                 'body',
                 $content,
                 [
                     'prepend' => [
                         'closeButton' => [
                             'content' => '&times;',
+                            'formatter' => function($content, $element) {
+                                return static::alertCloseButton($content, $element['options']);
+                            },
                         ],
                     ],
                 ]
             );
-            $closeButton = static::alertCloseButton(
-                $body['prepend']['closeButton']['content'],
-                $body['prepend']['closeButton']['options']
-            );
-            $content = $closeButton . $body['content'];
         }
 
-        static::addCssClass($options, 'alert alert-' . $type);
+        static::addCssClass($options, 'alert');
+        static::addCssClassWithSuffix($options, 'alert', ArrayHelper::popValue($options, 'type', self::ALERT_SUCCESS));
         return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
 
@@ -524,23 +544,25 @@ class Html extends \yii\helpers\Html
     }
 
     /**
-     * @param string $text
-     * @param string|array $url
+     * @param string $content
      * @param array $options
+     * - url, string|array
      *
      * @return string
      */
-    public static function alertLink($text, $url = null, array $options = [])
+    public static function alertLink($content, array $options = [])
     {
         static::addCssClass($options, 'alert-link');
-        return static::a($text, $url, $options);
+        return static::a($content, ArrayHelper::popValue($options, 'url'), $options);
     }
 
     /**
+     * Parses elements from the given content according to the given structure.
+     *
      * @param string|array $content
      * @param array $structure
      *
-     * @return array
+     * @return array the parsed elements.
      */
     public static function parseContent($content, array $structure = [])
     {
@@ -552,11 +574,13 @@ class Html extends \yii\helpers\Html
     }
 
     /**
+     * Parses the a specific element from the given content according to the given structure.
+     *
      * @param string $name
      * @param string|array $content
      * @param array $structure
      *
-     * @return array
+     * @return array the parsed element.
      */
     public static function parseElement($name, $content, array $structure = [])
     {
@@ -579,10 +603,12 @@ class Html extends \yii\helpers\Html
     }
 
     /**
+     * Normalizes the given element using the given default values.
+     *
      * @param array $element
      * @param array $defaults
      *
-     * @return array
+     * @return array the normalized element.
      */
     public static function normalizeElement(array $element, array $defaults = [])
     {
@@ -600,45 +626,101 @@ class Html extends \yii\helpers\Html
     }
 
     /**
+     * Renders the elements in the given content.
+     *
      * @param array $content
      *
-     * @return string
+     * @return string the rendered elements
      */
     public static function renderContent(array $content)
     {
-        $result = [];
+        $out = '';
         foreach ($content as $element) {
-            $result[] = static::renderElement($element);
+            $out .= static::renderElement($element);
         }
-        return implode(' ', $result);
+        return $out;
     }
 
     /**
-     * @param array $element
+     * Renders the given element.
      *
+     * @param array $element
      * - tag: string
      * - content: string
      * - options: array
      * - prepend: array
      * - append: array
+     * - allowEmpty: bool
      *
-     * @return string
+     * @return string the rendered element.
      */
     public static function renderElement(array $element)
     {
         $prepend = !empty($element['prepend']) ? static::renderContent($element['prepend']) . ' ' : '';
         $append = !empty($element['append']) ? ' ' . static::renderContent($element['append']) : '';
-        return static::tag($element['tag'], $prepend . $element['content'] . $append, $element['options']);
+        $content = $prepend . $element['content'] . $append;
+        if (!empty($content) || (isset($element['allowEmpty']) && $element['allowEmpty'])) {
+            if (isset($element['formatter']) && is_callable($element['formatter'])) {
+                return call_user_func($element['formatter'], $content, $element);
+            } else {
+                return static::tag($element['tag'], $content, $element['options']);
+            }
+        }
     }
 
     /**
+     * Parses and renders elements from the given content according to the given structure.
+     *
      * @param string|array $content
      * @param array $structure
      *
-     * @return string
+     * @return string the rendered elements.
      */
     protected static function content($content, array $structure = [])
     {
         return static::renderContent(static::parseContent($content, $structure));
+    }
+
+    /**
+     * Parses and renders a specific element from the given content according to the given structure.
+     *
+     * @param string $name
+     * @param array $content
+     * @param array $structure
+     *
+     * @return string the rendered element.
+     */
+    protected static function element($name, $content, array $structure = [])
+    {
+        return static::renderElement(static::parseElement($name, $content, $structure));
+    }
+
+    /**
+     * Adds a CSS class to the specified options.
+     *
+     * @param array $options
+     * @param string $class
+     */
+    public static function addCssClass(&$options, $class)
+    {
+        if (empty($class)) {
+            return;
+        }
+        parent::addCssClass($options, $class);
+    }
+
+    /**
+     * Adds a CSS class with the given suffix to the specified options.
+     *
+     * @param array $options
+     * @param string $class
+     * @param string $suffix
+     */
+    public static function addCssClassWithSuffix(&$options, $class, $suffix)
+    {
+        if (!empty($suffix) && strpos($class, $suffix) === false) {
+            $class .= '-' . $suffix;
+        }
+        static::addCssClass($options, $class);
     }
 }

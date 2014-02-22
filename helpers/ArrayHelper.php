@@ -18,9 +18,11 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 {
     /**
      * Removes and returns a specific value from the given array (or the default value if not set).
+     *
      * @param mixed $array the array to pop the item from.
      * @param string $key the item key.
      * @param mixed $default the default value.
+     *
      * @return mixed the value.
      */
     public static function popValue(&$array, $key, $default = null)
@@ -36,6 +38,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 
     /**
      * Sets the default value for a specific key in the given array.
+     *
      * @param mixed $array the array to set value for.
      * @param string $key the item key.
      * @param mixed $value the default value.
@@ -53,6 +56,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 
     /**
      * Sets a set of default values for the given array.
+     *
      * @param mixed $array the array to set values for.
      * @param array $values the default values.
      */
@@ -65,6 +69,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 
     /**
      * Removes a set of items from the given array.
+     *
      * @param array $array the array to remove from.
      * @param array $keys the keys to remove.
      */
@@ -77,10 +82,12 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
 
     /**
      * Copies the given values from one array to another.
+     *
      * @param array $keys the keys to copy.
      * @param array $from the array to copy from.
      * @param array $to the array to copy to.
      * @param boolean $force whether to allow overriding of existing values.
+     *
      * @return array the options.
      */
     public static function copyValues(array $keys, array $from, array $to, $force = false)
@@ -94,24 +101,36 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
     }
 
     /**
+     * Moves a specific value from one array to another.
+     *
+     * @param string $key the key for the value to move.
+     * @param array $from the array to move from.
+     * @param array $to the array to move to.
+     * @param boolean $force whether to allow overriding of existing values.
+     */
+    public static function moveValue($key, array &$from, array &$to, $force = false)
+    {
+        if (isset($from[$key])) {
+            $value = static::popValue($from, $key);
+            if ($force || !isset($to[$key])) {
+                $to[$key] = $value;
+                static::remove($from, $key);
+            }
+        }
+    }
+
+    /**
      * Moves the given values from one array to another.
+     *
      * @param array $keys the keys to move.
      * @param array $from the array to move from.
      * @param array $to the array to move to.
      * @param boolean $force whether to allow overriding of existing values.
-     * @return array the options.
      */
-    public static function moveValues(array $keys, array &$from, array $to, $force = false)
+    public static function moveValues(array $keys, array &$from, array &$to, $force = false)
     {
         foreach ($keys as $key) {
-            if (isset($from[$key])) {
-                $value = static::popValue($from, $key);
-                if ($force || !isset($to[$key])) {
-                    $to[$key] = $value;
-                    static::remove($from, $key);
-                }
-            }
+            static::moveValue($key, $from, $to, $force);
         }
-        return $to;
     }
 }
