@@ -2,9 +2,12 @@
 
 namespace yiistrap\tests\unit\helpers;
 
+use yiistrap\enums\Button;
+use yiistrap\enums\Icon;
+use yiistrap\enums\Label;
+use yiistrap\enums\Pagination;
 use yiistrap\helpers\Html;
 use yiistrap\tests\unit\TestCase;
-use yiistrap\widgets\Alert;
 
 class HtmlTest extends TestCase
 {
@@ -13,15 +16,46 @@ class HtmlTest extends TestCase
      */
     protected $codeGuy;
 
+    public function testBtn()
+    {
+        $I = $this->codeGuy;
+
+        $html = Html::btn(
+            'Button',
+            [
+                'context' => Button::CONTEXT_PRIMARY,
+                'size' => Button::SIZE_LG,
+                'active' => true,
+            ]
+        );
+        $btn = $I->createNode($html, '.btn');
+        $I->seeNodeCssClass($btn, 'btn btn-primary btn-lg active');
+        $I->dontSeeNodeCssClass($btn, 'btn-block');
+        $I->seeNodeText($btn, 'Button');
+
+        $html = Html::btn(
+            'Button',
+            [
+                'disabled' => true,
+                'block' => true,
+            ]
+        );
+        $btn = $I->createNode($html, '.btn');
+        $I->seeNodeCssClass($btn, 'btn-block');
+        $I->seeNodeAttribute($btn, 'disabled', 'disabled');
+    }
+
     public function testIcon()
     {
         $I = $this->codeGuy;
 
-        $html = Html::icon(Html::ICON_ADJUST, ['class' => 'test']);
+        $html = Html::icon(Icon::GLYPH_ADJUST);
         $icon = $I->createNode($html, 'span');
         $I->seeNodeCssClass($icon, 'glyphicon glyphicon-adjust');
-        $I->seeNodeCssClass($icon, 'test');
+    }
 
+    public function testIconConstants()
+    {
         // Icons are copy/pasted from the Bootstrap site.
         $icons = [
             'asterisk',
@@ -229,8 +263,177 @@ class HtmlTest extends TestCase
         foreach ($icons as $icon) {
             $const = strtoupper(str_replace('-', '_', $icon));
             // Evil eval to the rescue.
-            eval("\\yiistrap\\helpers\\Html::icon(\\yiistrap\\helpers\\Html::ICON_$const);");
+            eval("\\yiistrap\\helpers\\Html::icon(\\yiistrap\\enums\\Icon::GLYPH_$const);");
         }
+    }
+
+    public function testDropdown()
+    {
+        $I = $this->codeGuy;
+
+        $items = [
+            ['label' => 'Action', 'url' => '#'],
+            ['label' => 'Another action', 'url' => '#'],
+            ['label' => 'Something else here', 'url' => '#'],
+            Html::menuDivider(),
+            ['label' => 'Separated link', 'url' => '#'],
+        ];
+
+        $html = Html::dropdown(
+            [
+                'toggle' => [
+                    'label' => 'Dropdown',
+                    'class' => 'btn sr-only',
+                ],
+                'menu' => [
+                    'items' => $items,
+                ]
+            ]
+        );
+
+        $dropdown = $I->createNode($html, 'div.dropdown');
+        $I->seeNodeChildren($dropdown, ['a.dropdown-toggle', 'ul.dropdown-menu']);
+        $menu = $dropdown->filter('ul.dropdown-menu');
+        foreach ($menu->children() as $n => $liElement) {
+            $li = $I->createNode($liElement);
+            if ($n === 3) {
+                $I->seeNodeCssClass($li, 'divider');
+            } else {
+                $a = $li->filter('a');
+                $I->seeNodeAttribute($a, 'href', '#');
+                $I->seeNodeText($a, $items[$n]['label']);
+            }
+        }
+    }
+
+    public function testDropdownToggle()
+    {
+        $I = $this->codeGuy;
+
+        $html = Html::dropdownToggle('Dropdown');
+
+        $toggle = $I->createNode($html, 'a.dropdown-toggle');
+        $I->seeNodeAttribute($toggle, 'data-toggle', 'dropdown');
+        $I->seeNodePattern($toggle, '/ <span class="caret"><\/span>$/');
+    }
+
+    public function testNav()
+    {
+        $I = $this->codeGuy;
+
+        $items = [
+            ['label' => 'Home', 'url' => '#', 'active' => true],
+            ['label' => 'Profile', 'url' => '#'],
+            ['label' => 'Messages', 'url' => '#', 'disabled' => true],
+        ];
+
+        // normal
+        $html = Html::nav($items);
+        $nav = $I->createNode($html, 'ul.nav');
+        $I->seeNodeChildren($nav, ['li.active', 'li', 'li']);
+        foreach ($nav->children() as $n => $liElement) {
+            $li = $I->createNode($liElement, 'li');
+            if ($n === 0) {
+                $I->seeNodeCssClass($li, 'active');
+            } else if ($n === 2) {
+                $I->seeNodeCssClass($li, 'disabled');
+            }
+            $a = $li->filter('a');
+            $I->seeNodeAttribute($a, 'href', $items[$n]['url']);
+        }
+
+        // justified
+        $html = Html::tabs(
+            [
+                ['label' => 'Home', 'url' => '#', 'active' => true],
+                ['label' => 'Profile', 'url' => '#'],
+                ['label' => 'Messages', 'url' => '#'],
+            ],
+            [
+                'justified' => true,
+            ]
+        );
+        $nav = $I->createNode($html, 'ul.nav');
+        $I->seeNodeCssClass($nav, 'nav-justified');
+
+        $items = [
+            ['label' => 'Action', 'url' => '#'],
+            ['label' => 'Another action', 'url' => '#'],
+            ['label' => 'Something else here', 'url' => '#'],
+            Html::menuDivider(),
+            ['label' => 'Separated link', 'url' => '#'],
+        ];
+
+        // dropdown
+        $html = Html::tabs(
+            [
+                ['label' => 'Home', 'url' => '#', 'active' => true],
+                ['label' => 'Help', 'url' => '#'],
+                ['label' => 'Dropdown', 'items' => $items],
+            ]
+        );
+        $nav = $I->createNode($html, 'ul.nav');
+        foreach ($nav->children() as $n => $liElement) {
+            $li = $I->createNode($liElement, 'li');
+            if ($n === 2) {
+                $I->seeNodeCssClass($li, 'dropdown');
+                $I->seeNodeChildren($li, ['a.dropdown-toggle', 'ul.dropdown-menu']);
+            }
+        }
+    }
+
+    public function testTabs()
+    {
+        $I = $this->codeGuy;
+
+        $html = Html::tabs(
+            [
+                ['label' => 'Home', 'url' => '#', 'active' => true],
+                ['label' => 'Profile', 'url' => '#'],
+                ['label' => 'Messages', 'url' => '#'],
+            ]
+        );
+        $nav = $I->createNode($html, 'ul.nav');
+        $I->seeNodeCssClass($nav, 'nav-tabs');
+    }
+
+    public function testPills()
+    {
+        $I = $this->codeGuy;
+
+        // normal
+        $html = Html::pills(
+            [
+                ['label' => 'Home', 'url' => '#', 'active' => true],
+                ['label' => 'Profile', 'url' => '#'],
+                ['label' => 'Messages', 'url' => '#'],
+            ]
+        );
+        $nav = $I->createNode($html, 'ul.nav');
+        $I->seeNodeCssClass($nav, 'nav-pills');
+
+        // stacked
+        $html = Html::pills(
+            [
+                ['label' => 'Home', 'url' => '#', 'active' => true],
+                ['label' => 'Profile', 'url' => '#'],
+                ['label' => 'Messages', 'url' => '#'],
+            ],
+            [
+                'stacked' => true,
+            ]
+        );
+        $nav = $I->createNode($html, 'ul.nav');
+        $I->seeNodeCssClass($nav, 'nav-pills');
+    }
+
+    public function testDivider()
+    {
+        $I = $this->codeGuy;
+
+        $html = Html::menuDivider();
+        $divider = $I->createNode($html, 'li');
+        $I->seeNodeCssClass($divider, 'divider');
     }
 
     public function testBreadcrumbs()
@@ -266,10 +469,11 @@ class HtmlTest extends TestCase
                 ['label' => '3', 'url' => 'http://getyiistrap.com/home/3', 'disabled' => true],
             ],
             [
-                'size' => Html::PAGINATION_LG,
+                'size' => Pagination::SIZE_LG,
             ]
         );
-        $pagination = $I->createNode($html, 'ul.pagination.pagination-lg');
+        $pagination = $I->createNode($html, 'ul.pagination');
+        $I->seeNodeCssClass($pagination, 'pagination-lg');
         $I->seeNodeChildren($pagination, ['li', 'li > span', 'li']);
         $items = $pagination->filter('li');
         $first = $items->first();
@@ -306,14 +510,14 @@ class HtmlTest extends TestCase
         $html = Html::labelTb(
             'Primary',
             [
-                'type' => Html::LABEL_PRIMARY,
+                'context' => Label::CONTEXT_PRIMARY,
             ]
         );
         $label = $I->createNode($html, 'span');
         $I->seeNodeCssClass($label, 'label label-primary');
         $I->seeNodeText($label, 'Primary');
 
-        $html = Html::labelTb(Html::icon(Html::ICON_INBOX) . ' Inbox');
+        $html = Html::labelTb(Html::icon(Icon::GLYPH_INBOX) . ' Inbox');
         $label = $I->createNode($html, 'span');
         $I->seeNodePattern($label, '/> Inbox$/');
         $I->seeNodeChildren($label, ['.glyphicon']);
