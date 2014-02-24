@@ -153,6 +153,7 @@ class CodeHelper extends \Codeception\Module
      */
     public function seeNodeChildren($node, array $elements)
     {
+        // todo: fix to check for immediate children.
         /** @var \DomElement $child */
         foreach ($node->children() as $i => $child) {
             if (isset($elements[$i])) {
@@ -167,6 +168,7 @@ class CodeHelper extends \Codeception\Module
      */
     public function dontSeeNodeChildren($node, array $elements)
     {
+        // todo: fix to check for immediate children.
         /** @var \DomElement $child */
         foreach ($node->children() as $i => $child) {
             if (isset($elements[$i])) {
@@ -178,6 +180,7 @@ class CodeHelper extends \Codeception\Module
     /**
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param integer $amount
+     * @param string $filter
      */
     public function seeNodeNumChildren($node, $amount, $filter = null)
     {

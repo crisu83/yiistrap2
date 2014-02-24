@@ -16,6 +16,7 @@ use yiistrap\enums\Alert;
 use yiistrap\enums\Button;
 use yiistrap\enums\Label;
 use yiistrap\enums\Nav;
+use yiistrap\helpers\ArrayHelper;
 
 /**
  * @author Christoffer Niska <christoffer.niska@gmail.com>
@@ -26,9 +27,8 @@ class Html extends BaseHtml
 {
     /**
      * @param string $label
+     * @param string|array|null $url
      * @param array $options
-     * - tag: string
-     * - type: string
      * - context: string
      * - size: string
      * - block: bool
@@ -37,12 +37,151 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    public static function btn($label, array $options = [])
+    public static function linkTb($label, $url = null, array $options = [])
+    {
+        if (ArrayHelper::popValue($options, 'disabled')) {
+            static::addCssClass($options, 'disabled');
+        }
+
+        $options['url'] = $url;
+        $options['role'] = 'button';
+        $options['formatter'] = function($label, $options) {
+            return static::a($label, ArrayHelper::popValue($options, 'url'), $options);
+        };
+        return static::btn($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function buttonTb($label, array $options = [])
+    {
+        if (ArrayHelper::popValue($options, 'disabled')) {
+            $options['disabled'] = 'disabled';
+        }
+
+        ArrayHelper::defaultValue($options, 'type', 'button');
+
+        $options['formatter'] = function($label, $options) {
+            return static::button($label, $options);
+        };
+        return static::btn($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function submitButtonTb($label, array $options = [])
+    {
+        $options['type'] = 'submit';
+        return static::buttonTb($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function resetButtonTb($label, array $options = [])
+    {
+        $options['type'] = 'reset';
+        return static::buttonTb($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function buttonInputTb($label, array $options = [])
+    {
+        if (ArrayHelper::popValue($options, 'disabled')) {
+            $options['disabled'] = 'disabled';
+        }
+
+        $options['formatter'] = function($label, $options) {
+            return static::buttonInput($label, $options);
+        };
+        return static::btn($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function submitInputTb($label, array $options = [])
+    {
+        $options['type'] = 'submit';
+        return static::buttonInputTb($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    public static function resetInputTb($label, array $options = [])
+    {
+        $options['type'] = 'reset';
+        return static::buttonInputTb($label, $options);
+    }
+
+    /**
+     * @param string $label
+     * @param array $options
+     * - context: string
+     * - size: string
+     * - block: bool
+     * - active: bool
+     * - disabled: bool
+     *
+     * @return string
+     */
+    protected static function btn($label, array $options = [])
     {
         if (ArrayHelper::popValue($options, 'active')) {
             static::addCssClass($options, 'active');
-        } else if (ArrayHelper::popValue($options, 'disabled')) {
-            $options['disabled'] = 'disabled';
         }
 
         static::addCssClass($options, 'btn');
@@ -54,23 +193,11 @@ class Html extends BaseHtml
         static::addCssClassWithSuffix($options, 'btn', ArrayHelper::popValue($options, 'size'));
         static::addCssClassWithSuffix($options, 'btn', ArrayHelper::popValue($options, 'block') ? 'block' : '');
 
-        $tag = ArrayHelper::popValue($options, 'tag', 'button');
-        switch ($tag) {
-            case 'button':
-                ArrayHelper::defaultValue($options, 'type', 'button');
-                break;
-            case 'input':
-                $options['value'] = $label;
-                $label = '';
-                break;
-            default:
-            case 'a':
-                if (ArrayHelper::popValue($options, 'disabled')) {
-                    static::addCssClass($options, 'disabled');
-                }
+        $formatter = ArrayHelper::popValue($options, 'formatter');
+        if (!is_callable($formatter)) {
+            // todo: throw exception
         }
-
-        return static::tag($tag, $label, $options);
+        return call_user_func($formatter, $label, $options);
     }
 
     /**
@@ -111,8 +238,10 @@ class Html extends BaseHtml
                     'menu' => [
                         'items' => [],
                         'formatter' => function ($content, $element) {
-                            ArrayHelper::defaultValue($element, 'items', []);
-                            return static::dropdownMenu($element['items'], $element['options']);
+                            return static::dropdownMenu(
+                                ArrayHelper::popValue($element, 'items', []),
+                                $element['options']
+                            );
                         }
                     ]
                 ]
@@ -151,7 +280,7 @@ class Html extends BaseHtml
     {
         $options['item'] = function($item, $index) {
             if (!isset($item['label'])) {
-                // todo: throw exception ?
+                // todo: throw exception
             }
             if (isset($item['items'])) {
                 ArrayHelper::defaultValue($item, 'content', []);
@@ -160,6 +289,7 @@ class Html extends BaseHtml
                     [
                         'toggle' => [
                             'content' => $item['label'],
+                            'options' => ['href' => '#'],
                         ],
                         'menu' => [
                             'items' => $item['items'],
@@ -257,7 +387,7 @@ class Html extends BaseHtml
             return static::tag('li', $item['content'], $options);
         };
 
-        static::addCssClass($options, 'breadcrumbs');
+        static::addCssClass($options, 'breadcrumb');
         return static::ol($items, $options);
     }
 
@@ -323,11 +453,11 @@ class Html extends BaseHtml
             return $item; // already rendered
         }
 
-        $options = ArrayHelper::popValue($item, 'itemOptions', []);
-
         if (!ArrayHelper::popValue($item, 'visible', true)) {
             return '';
         }
+
+        $options = ArrayHelper::popValue($item, 'itemOptions', []);
 
         if (ArrayHelper::popValue($item, 'active')) {
             static::addCssClass($options, 'active');
@@ -335,11 +465,21 @@ class Html extends BaseHtml
             static::addCssClass($options, 'disabled');
         }
 
+        $linkOptions = ArrayHelper::popValue($item, 'options', []);
+
+        if (isset($item['icon'])) {
+            $linkOptions['icon'] = ArrayHelper::popValue($item, 'icon');
+        }
+
+        if (isset($item['badge'])) {
+            $linkOptions['badge'] = ArrayHelper::popValue($item, 'badge');
+        }
+
         if (isset($item['url'])) {
             $item['content'] = static::a(
                 ArrayHelper::popValue($item, 'label'),
                 ArrayHelper::popValue($item, 'url'),
-                ArrayHelper::popValue($item, 'options', [])
+                $linkOptions
             );
         }
 
@@ -398,6 +538,15 @@ class Html extends BaseHtml
                     ],
                     'body' => [
                         'tag' => 'p'
+                    ],
+                    'buttons' => [
+                        'tag' => 'p',
+                        'formatter' => function($c, $element) use ($content) {
+                            return static::listFactory(
+                                function($items) { return static::buttonFactory($items); },
+                                ArrayHelper::popValue($content, 'buttons', [])
+                            );
+                        },
                     ],
                 ]
             );
@@ -458,14 +607,15 @@ class Html extends BaseHtml
      */
     public static function thumbnail($content, array $options = [])
     {
+        // todo: clean up this method.
         $image = self::getRenderer()->element(
             'image',
             $content,
             [
                 'src' => '',
                 'formatter' => function ($content, $element) {
-                        return static::img($element['src'], $element['options']);
-                    },
+                    return static::img($element['src'], $element['options']);
+                },
                 'allowEmpty' => true,
             ]
         );
@@ -483,6 +633,17 @@ class Html extends BaseHtml
                         'label' => [
                             'tag' => 'h3',
                         ]
+                    ],
+                    'append' => [
+                        'buttons' => [
+                            'tag' => 'p',
+                            'formatter' => function($c, $element) use ($content) {
+                                return static::listFactory(
+                                    function($items) { return static::buttonFactory($items); },
+                                    ArrayHelper::popValue($content, 'buttons', [])
+                                );
+                            },
+                        ],
                     ],
                 ]
             );
@@ -513,6 +674,7 @@ class Html extends BaseHtml
                 'body',
                 $content,
                 [
+                    'tag' => false,
                     'prepend' => [
                         'closeButton' => [
                             'content' => '&times;',
@@ -523,6 +685,7 @@ class Html extends BaseHtml
                     ],
                 ]
             );
+            static::addCssClass($options, 'alert-dismissable');
         }
 
         static::addCssClass($options, 'alert');
@@ -579,6 +742,83 @@ class Html extends BaseHtml
     {
         static::addCssClass($options, 'alert-link');
         return static::a($label, $url, $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function tag($name, $content = '', array $options = [])
+    {
+        if (isset($options['icon'])) {
+            $icon = ArrayHelper::popValue($options, 'icon');
+            if (is_string($icon)) {
+                $icon = ['content' => $icon];
+            }
+            $content = static::icon($icon['content'], ArrayHelper::popValue($icon, 'options', [])) . ' ' . $content;
+        }
+
+        if (isset($options['badge'])) {
+            $badge = ArrayHelper::popValue($options, 'badge');
+            if (is_string($badge)) {
+                $badge = ['content' => $badge];
+            }
+            $content .= ' ' . static::badge($badge['content'], ArrayHelper::popValue($badge, 'options', []));
+        }
+
+        return parent::tag($name, $content, $options);
+    }
+
+    /**
+     * @param callable $formatter
+     * @param array $items
+     *
+     * @return string
+     */
+    protected static function listFactory($formatter, array $items)
+    {
+        if (!is_callable($formatter)) {
+            // todo: throw exception
+        }
+        if (empty($items)) {
+            return '';
+        }
+        $result = '';
+        foreach ($items as $item) {
+            $result .= ' ' . call_user_func($formatter, $item);
+        }
+        return $result;
+    }
+
+    /**
+     * @param array $options
+     * - type, string
+     * - label, string
+     * - url, string|array|null
+     * - options, array
+     *
+     * @return string
+     */
+    protected static function buttonFactory(array $options)
+    {
+        $label = ArrayHelper::popValue($options, 'label');
+
+        switch (ArrayHelper::popValue($options, 'type', 'button')) {
+            case Button::TYPE_LINK:
+                return static::linkTb($label, ArrayHelper::popValue($options, 'url'), $options);
+            case Button::TYPE_SUBMIT:
+                return static::submitButtonTb($label, $options);
+            case Button::TYPE_RESET:
+                return static::resetButtonTb($label, $options);
+            case Button::TYPE_INPUT:
+                return static::buttonInputTb($label, $options);
+            case Button::TYPE_INPUT_SUBMIT:
+                return static::submitInputTb($label, $options);
+            case Button::TYPE_INPUT_RESET:
+                return static::resetInputTb($label, $options);
+            default:
+            case Button::TYPE_BUTTON:
+                return static::buttonTb($label, $options);
+        }
     }
 
     /**

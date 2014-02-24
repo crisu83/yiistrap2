@@ -20,7 +20,7 @@ class HtmlTest extends TestCase
     {
         $I = $this->codeGuy;
 
-        $html = Html::btn(
+        $html = Html::buttonTb(
             'Button',
             [
                 'context' => Button::CONTEXT_PRIMARY,
@@ -33,7 +33,7 @@ class HtmlTest extends TestCase
         $I->dontSeeNodeCssClass($btn, 'btn-block');
         $I->seeNodeText($btn, 'Button');
 
-        $html = Html::btn(
+        $html = Html::buttonTb(
             'Button',
             [
                 'disabled' => true,
@@ -448,7 +448,7 @@ class HtmlTest extends TestCase
             ]
         );
 
-        $breadcrumbs = $I->createNode($html, 'ol.breadcrumbs');
+        $breadcrumbs = $I->createNode($html, 'ol.breadcrumb');
         $I->seeNodeChildren($breadcrumbs, ['li', 'li', 'li']);
         $items = $breadcrumbs->filter('li');
         $first = $items->first()->filter('a');
@@ -636,7 +636,6 @@ class HtmlTest extends TestCase
                 'label' => [
                     'tag' => 'h5',
                     'content' => 'Thumbnail label',
-                    'options' => ['class' => 'label'],
                 ],
                 'caption' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad, alias consequuntur eius eveniet facilis inventore ipsam iste iure minima nisi possimus quae reprehenderit vero? Aspernatur assumenda exercitationem odio quidem ut.',
             ]
@@ -657,11 +656,11 @@ class HtmlTest extends TestCase
         $html = Html::alert(
             [
                 'body' => '<strong>Well done!</strong> You successfully read this important alert message.',
-                'closeButton' => [],
             ]
         );
         $alert = $I->createNode($html, 'div.alert');
-        $I->seeNodeCssClass($alert, 'alert-success');
+        $I->seeNodeCssClass($alert, 'alert-success alert-dismissable');
+        $I->seeNodeChildren($alert, ['button.close', 'strong']);
         $I->seeNodeText($alert, 'You successfully read this important alert message.');
         $strong = $alert->filter('strong');
         $I->seeNodeText($strong, 'Well done!');

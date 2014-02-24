@@ -540,6 +540,7 @@ class CodeGuy extends \Codeception\AbstractGuy
      *
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param integer $amount
+     * @param string $filter
     * Conditional Assertion: Test won't be stopped on fail
      * @see Codeception\Module\CodeHelper::seeNodeNumChildren()
      * @return \Codeception\Maybe
@@ -559,6 +560,7 @@ class CodeGuy extends \Codeception\AbstractGuy
      *
      * @param \Symfony\Component\DomCrawler\Crawler $node
      * @param integer $amount
+     * @param string $filter
      * @see Codeception\Module\CodeHelper::seeNodeNumChildren()
      * @return \Codeception\Maybe
      */
