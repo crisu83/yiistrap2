@@ -11,8 +11,3 @@ settings:
     log: true
 coverage:
     enabled: true
-    include:
-        - yiistrap/*
-    exclude:
-        - yiistrap/assets/*
-        - yiistrap/widgets/*Asset.php

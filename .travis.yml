@@ -5,9 +5,13 @@ php:
 
 before_script:
   - composer self-update
-  - composer install --prefer-source
+  - composer install --no-interaction --prefer-source
 
-script: vendor/bin/codecept run unit
+script: vendor/bin/codecept run --coverage --xml
+
+after_script:
+  - wget https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
 branches:
   only:
