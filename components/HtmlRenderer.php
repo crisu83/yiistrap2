@@ -101,9 +101,7 @@ class HtmlRenderer extends Component
      */
     public function renderElement(array $element)
     {
-        $prepend = !empty($element['prepend']) ? $this->renderContent($element['prepend']) . ' ' : '';
-        $append = !empty($element['append']) ? ' ' . $this->renderContent($element['append']) : '';
-        $content = $prepend . $element['content'] . $append;
+        $content = $this->prepend($element['prepend']) . $element['content'] . $this->append($element['append']);
 
         if (empty($content) && isset($element['allowEmpty']) && !$element['allowEmpty']) {
             return '';
@@ -114,6 +112,30 @@ class HtmlRenderer extends Component
         }
 
         return $element['tag'] !== false ? Html::tag($element['tag'], $content, $element['options']) : $content;
+    }
+
+    /**
+     * Renders the given content to prepend.
+     *
+     * @param string|array $content
+     *
+     * @return string
+     */
+    protected function prepend($content)
+    {
+        return !empty($content) ? $this->renderContent($content) . ' ' : '';
+    }
+
+    /**
+     * Renders the given content to append.
+     *
+     * @param string|array $content
+     *
+     * @return string
+     */
+    protected function append($content)
+    {
+        return !empty($content) ? ' ' . $this->renderContent($content) : '';
     }
 
     /**
