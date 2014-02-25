@@ -760,17 +760,63 @@ class Html extends BaseHtml
     }
 
     /**
-     * @param int|array $percent
+     * @param int|array $content
      * @param array $options
      *
      * @return string
      */
-    /*
-    public static function progress($percentage, array $options = [])
+    public static function progress($content, array $options = [])
     {
-        return '';
+        if (!is_array($content)) {
+            $content = [
+                ['percentage' => $content],
+            ];
+        }
+
+        $defaults = ['context' => null, 'showLabel' => false];
+        ArrayHelper::moveValues(array('context', 'showLabel'), $options, $defaults);
+
+        $content = static::listFactory(function($bar) use ($defaults) {
+            $bar = static::getRenderer()->normalizeElement($bar);
+            ArrayHelper::copyValues(array_keys($defaults), $bar, $bar['options']);
+            ArrayHelper::defaultValues($bar['options'], $defaults);
+            return static::progressBar($bar['percentage'], $bar['options']);
+        }, $content);
+
+        if (ArrayHelper::popValue($options, 'animated')) {
+            static::addCssClass($options, 'active');
+            $options['striped'] = true; // active must be striped.
+        }
+
+        static::addCssClass($options, 'progress');
+        static::addCssClassWithCondition($options, 'progress-striped', ArrayHelper::popValue($options, 'striped'));
+
+        return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
-    */
+
+    /**
+     * @param int $percentage
+     * @param array $options
+     *
+     * @return string
+     */
+    public static function progressBar($percentage, array $options = [])
+    {
+        $content = !ArrayHelper::popValue($options, 'showLabel', false)
+            ? static::tag('span', $percentage . '%', ['class' => 'sr-only'])
+            : $percentage . '%';
+
+        static::addCssClass($options, 'progress-bar');
+        static::addCssClassWithSuffix($options, 'progress-bar', ArrayHelper::popValue($options, 'context'));
+
+        static::addCssStyle($options, 'width: ' . $percentage . '%');
+
+        $options['role'] = 'progressbar';
+        $options['aria-valuenow'] = $percentage;
+        $options['aria-valuemin'] = '0';
+        $options['aria-valuemax'] = '100';
+        return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
+    }
 
     /**
      * @inheritDoc
@@ -891,7 +937,7 @@ class Html extends BaseHtml
         if (!isset(self::$_renderer)) {
             self::$_renderer = new HtmlRenderer;
         }
-        
+
         return self::$_renderer;
     }
 }

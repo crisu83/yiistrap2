@@ -60,7 +60,7 @@ class HtmlRenderer extends Component
      */
     public function normalizeElement($element, array $defaults = [])
     {
-        if (is_string($element)) {
+        if (!is_array($element)) {
             $element = ['content' => $element];
         }
 

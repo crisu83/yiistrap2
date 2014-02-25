@@ -55,16 +55,33 @@ class ArrayHelperTest extends TestCase
         $this->assertArrayNotHasKey('my', $array);
     }
 
-    public function testCopyValues()
+    public function testCopyValue()
     {
         $a = array('key' => 'value');
         $b = array();
-        $array = ArrayHelper::copyValues(array('key'), $a, $b);
-        $this->assertEquals($a, $array);
+        ArrayHelper::copyValue('key', $a, $b);
+        $this->assertArrayHasKey('key', $a);
+        $this->assertEquals('value', ArrayHelper::getValue($b, 'key'));
         $a = array('key' => 'value');
         $b = array('key' => 'other');
-        $array = ArrayHelper::copyValues(array('key'), $a, $b, true);
-        $this->assertEquals($a, $array);
+        ArrayHelper::copyValue('key', $a, $b, true);
+        $this->assertEquals('value', ArrayHelper::getValue($b, 'key'));
+    }
+
+    public function testCopyValues()
+    {
+        $a = array('key' => 'iron', 'door' => 'wooden');
+        $b = array();
+        ArrayHelper::copyValues(array('key', 'door'), $a, $b);
+        $this->assertArrayHasKey('key', $a);
+        $this->assertArrayHasKey('door', $a);
+        $this->assertEquals('iron', ArrayHelper::getValue($b, 'key'));
+        $this->assertEquals('wooden', ArrayHelper::getValue($b, 'door'));
+        $a = array('key' => 'iron', 'door' => 'wooden');
+        $b = array('key' => 'steel', 'door' => 'glass');
+        ArrayHelper::copyValues(array('key', 'door'), $a, $b, true);
+        $this->assertEquals('iron', ArrayHelper::getValue($b, 'key'));
+        $this->assertEquals('wooden', ArrayHelper::getValue($b, 'door'));
     }
 
     public function testMoveValue()

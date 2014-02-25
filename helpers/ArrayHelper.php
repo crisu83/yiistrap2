@@ -81,23 +81,37 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
     }
 
     /**
-     * Copies the given values from one array to another.
+     * Copies a specific value from one array to another.
      *
-     * @param array $keys the keys to copy.
+     * @param string $key the key for the value to copy.
      * @param array $from the array to copy from.
      * @param array $to the array to copy to.
      * @param boolean $force whether to allow overriding of existing values.
      *
      * @return array the options.
      */
-    public static function copyValues(array $keys, array $from, array $to, $force = false)
+    public static function copyValue($key, array $from, array &$to, $force = false)
+    {
+        if (isset($from[$key]) && ($force || !isset($to[$key]))) {
+            $to[$key] = static::getValue($from, $key);
+        }
+    }
+
+    /**
+     * Copies the given values from one array to another.
+     *
+     * @param array $keys the keys for the values to copy.
+     * @param array $from the array to copy from.
+     * @param array $to the array to copy to.
+     * @param boolean $force whether to allow overriding of existing values.
+     *
+     * @return array the options.
+     */
+    public static function copyValues(array $keys, array $from, array &$to, $force = false)
     {
         foreach ($keys as $key) {
-            if (isset($from[$key]) && ($force || !isset($to[$key]))) {
-                $to[$key] = static::getValue($from, $key);
-            }
+            static::copyValue($key, $from, $to, $force);
         }
-        return $to;
     }
 
     /**
@@ -122,7 +136,7 @@ class ArrayHelper extends \yii\helpers\ArrayHelper
     /**
      * Moves the given values from one array to another.
      *
-     * @param array $keys the keys to move.
+     * @param array $keys the keys for the values to move.
      * @param array $from the array to move from.
      * @param array $to the array to move to.
      * @param boolean $force whether to allow overriding of existing values.

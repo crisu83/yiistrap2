@@ -692,7 +692,6 @@ class HtmlTest extends TestCase
         $I->seeNodeText($a, 'this important alert message');
     }
 
-    /*
     public function testProgress()
     {
         $I = $this->codeGuy;
@@ -715,7 +714,7 @@ class HtmlTest extends TestCase
         $I->seeNodeText($span, '60%');
 
         // show percentage
-        $html = Html::progress(60, ['showPercentage' => true]);
+        $html = Html::progress(60, ['showLabel' => true]);
         $progress = $I->createNode($html, 'div.progress');
         $bar = $progress->filter('div.progress-bar');
         $I->seeNodeText($bar, '60%');
@@ -739,20 +738,24 @@ class HtmlTest extends TestCase
         $I->seeNodeCssClass($progress, 'progress-striped');
 
         // animated
-        $html = Html::progress(60, ['striped' => true]);
+        $html = Html::progress(60, ['animated' => true]);
         $progress = $I->createNode($html, 'div.progress');
         $I->seeNodeCssClass($progress, 'progress-striped active');
 
         // stacked
-        $html = Html::progress(
-            [
-                ['percentage' => 35, 'context' => Progress::CONTEXT_SUCCESS],
-                ['percentage' => 20, 'context' => Progress::CONTEXT_WARNING],
-                ['percentage' => 10, 'context' => Progress::CONTEXT_DANGER],
-            ]
-        );
+        $bars = [
+            ['percentage' => 35, 'context' => Progress::CONTEXT_SUCCESS],
+            ['percentage' => 20, 'context' => Progress::CONTEXT_WARNING],
+            ['percentage' => 10, 'context' => Progress::CONTEXT_DANGER],
+        ];
+
+        $html = Html::progress($bars);
         $progress = $I->createNode($html, 'div.progress');
-        $I->seeNodeCssClass($progress, 'progress-striped');
+        foreach ($progress->children() as $n => $barElement) {
+            $bar = $I->createNode($barElement, 'div.progress-bar');
+            $I->seeNodeCssClass($bar, 'progress-bar-' . $bars[$n]['context']);
+            $span = $bar->filter('span.sr-only');
+            $I->seeNodeText($span, $bars[$n]['percentage'] . '%');
+        }
     }
-    */
 }
