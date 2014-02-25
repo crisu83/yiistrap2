@@ -38,13 +38,11 @@ class Html extends BaseHtml
      */
     public static function linkTb($label, $url = null, array $options = [])
     {
-        if (ArrayHelper::popValue($options, 'disabled')) {
-            static::addCssClass($options, 'disabled');
-        }
+        static::addCssClassWithCondition($options, 'disabled', ArrayHelper::popValue($options, 'disabled'));
 
         $options['url'] = $url;
         $options['role'] = 'button';
-        $options['formatter'] = function($label, $options) {
+        $options['formatter'] = function ($label, $options) {
             return static::a($label, ArrayHelper::popValue($options, 'url'), $options);
         };
 
@@ -70,9 +68,10 @@ class Html extends BaseHtml
 
         ArrayHelper::defaultValue($options, 'type', 'button');
 
-        $options['formatter'] = function($label, $options) {
+        $options['formatter'] = function ($label, $options) {
             return static::button($label, $options);
         };
+
         return static::btn($label, $options);
     }
 
@@ -127,9 +126,10 @@ class Html extends BaseHtml
             $options['disabled'] = 'disabled';
         }
 
-        $options['formatter'] = function($label, $options) {
+        $options['formatter'] = function ($label, $options) {
             return static::buttonInput($label, $options);
         };
+
         return static::btn($label, $options);
     }
 
@@ -181,10 +181,6 @@ class Html extends BaseHtml
     public static function btn($label, array $options = [])
     {
         // todo: add tests.
-        if (ArrayHelper::popValue($options, 'active')) {
-            static::addCssClass($options, 'active');
-        }
-
         static::addCssClass($options, 'btn');
         static::addCssClassWithSuffix(
             $options,
@@ -193,10 +189,11 @@ class Html extends BaseHtml
         );
         static::addCssClassWithSuffix($options, 'btn', ArrayHelper::popValue($options, 'size'));
         static::addCssClassWithSuffix($options, 'btn', ArrayHelper::popValue($options, 'block') ? 'block' : '');
+        static::addCssClassWithCondition($options, 'active', ArrayHelper::popValue($options, 'active'));
 
         $formatter = ArrayHelper::popValue($options, 'formatter');
         //if (!is_callable($formatter)) {
-            // todo: throw exception
+        // todo: throw exception
         //}
         return call_user_func($formatter, $label, $options);
     }
@@ -234,26 +231,28 @@ class Html extends BaseHtml
                             ]
                         ],
                         'formatter' => function ($element) {
-                            return static::dropdownToggle($element['content'], $element['options']);
-                        },
+                                return static::dropdownToggle($element['content'], $element['options']);
+                            },
                     ],
                     'menu' => [
                         'items' => [],
                         'formatter' => function ($element) {
-                            return static::dropdownMenu(
-                                ArrayHelper::popValue($element, 'items', []),
-                                $element['options']
-                            );
-                        }
+                                return static::dropdownMenu(
+                                    ArrayHelper::popValue($element, 'items', []),
+                                    $element['options']
+                                );
+                            }
                     ]
                 ]
             );
 
             static::addCssClass($content['menu']['options'], 'dropdown-menu');
+
             $content = self::getRenderer()->renderContent($content);
         }
 
         static::addCssClass($options, 'dropdown');
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
 
@@ -267,8 +266,9 @@ class Html extends BaseHtml
     {
         $content .= ' <span class="caret"></span>';
 
-        $options['data-toggle'] = 'dropdown';
         static::addCssClass($options, 'dropdown-toggle');
+
+        $options['data-toggle'] = 'dropdown';
         return static::tag(ArrayHelper::popValue($options, 'tag', 'a'), $content, $options);
     }
 
@@ -281,12 +281,13 @@ class Html extends BaseHtml
     public static function nav(array $items, array $options = [])
     {
         // todo: add more tests.
-        $options['item'] = function($item, $index) {
+        $options['item'] = function ($item, $index) {
             //if (!isset($item['label'])) {
-                // todo: throw exception
+            // todo: throw exception
             //}
             if (isset($item['items'])) {
                 ArrayHelper::defaultValue($item, 'content', []);
+
                 $item['content'] = self::getRenderer()->parseContent(
                     $item['content'],
                     [
@@ -311,6 +312,7 @@ class Html extends BaseHtml
         static::addCssClass($options, 'nav');
         static::addCssClassWithSuffix($options, 'nav', ArrayHelper::popValue($options, 'type'));
         static::addCssClassWithSuffix($options, 'nav', ArrayHelper::popValue($options, 'justified') ? 'justified' : '');
+
         return static::ul($items, $options);
     }
 
@@ -334,8 +336,9 @@ class Html extends BaseHtml
      */
     public static function pills(array $items, array $options = [])
     {
-        $options['type'] = Nav::TYPE_PILLS;
         static::addCssClassWithSuffix($options, 'nav', ArrayHelper::popValue($options, 'stacked') ? 'stacked' : '');
+
+        $options['type'] = Nav::TYPE_PILLS;
         return static::nav($items, $options);
     }
 
@@ -377,8 +380,6 @@ class Html extends BaseHtml
                 $item = ['content' => $item];
             }
 
-            $options = ArrayHelper::popValue($item, 'itemOptions', []);
-
             if (isset($item['url'])) {
                 $item['content'] = static::a(
                     ArrayHelper::popValue($item, 'label'),
@@ -387,10 +388,11 @@ class Html extends BaseHtml
                 );
             }
 
-            return static::tag('li', $item['content'], $options);
+            return static::tag('li', $item['content'], ArrayHelper::popValue($item, 'itemOptions', []));
         };
 
         static::addCssClass($options, 'breadcrumb');
+
         return static::ol($items, $options);
     }
 
@@ -416,6 +418,7 @@ class Html extends BaseHtml
 
         static::addCssClass($options, 'pagination');
         static::addCssClassWithSuffix($options, 'pagination', ArrayHelper::popValue($options, 'size'));
+
         return static::ul($items, $options);
     }
 
@@ -431,16 +434,18 @@ class Html extends BaseHtml
         $options['item'] = function ($item, $index) {
             ArrayHelper::defaultValue($item, 'itemOptions', []);
 
-            if (ArrayHelper::popValue($item, 'previous')) {
-                static::addCssClass($item['itemOptions'], 'previous');
-            } else if (ArrayHelper::popValue($item, 'next')) {
-                static::addCssClass($item['itemOptions'], 'next');
-            }
+            static::addCssClassWithCondition(
+                $item['itemOptions'],
+                'previous',
+                ArrayHelper::popValue($item, 'previous')
+            );
+            static::addCssClassWithCondition($item['itemOptions'], 'next', ArrayHelper::popValue($item, 'next'));
 
             return static::menuItem($item, $index);
         };
 
         static::addCssClass($options, 'pager');
+
         return static::ul($items, $options);
     }
 
@@ -451,7 +456,6 @@ class Html extends BaseHtml
      */
     public static function menuItem($item)
     {
-        // todo: refactor this method (too complex).
         // todo: add tests.
         if (is_string($item)) {
             return $item; // already rendered
@@ -463,21 +467,13 @@ class Html extends BaseHtml
 
         $options = ArrayHelper::popValue($item, 'itemOptions', []);
 
-        if (ArrayHelper::popValue($item, 'active')) {
-            static::addCssClass($options, 'active');
-        } else if (ArrayHelper::popValue($item, 'disabled')) {
-            static::addCssClass($options, 'disabled');
-        }
+        static::addCssClassWithCondition($options, 'active', ArrayHelper::popValue($item, 'active'));
+        static::addCssClassWithCondition($options, 'disabled', ArrayHelper::popValue($item, 'disabled'));
 
         $linkOptions = ArrayHelper::popValue($item, 'options', []);
 
-        if (isset($item['icon'])) {
-            $linkOptions['icon'] = ArrayHelper::popValue($item, 'icon');
-        }
-
-        if (isset($item['badge'])) {
-            $linkOptions['badge'] = ArrayHelper::popValue($item, 'badge');
-        }
+        ArrayHelper::moveValue('icon', $item, $linkOptions);
+        ArrayHelper::moveValue('badge', $item, $linkOptions);
 
         if (isset($item['url'])) {
             $item['content'] = static::a(
@@ -505,6 +501,7 @@ class Html extends BaseHtml
             'label',
             ArrayHelper::popValue($options, 'context', Label::CONTEXT_DEFAULT)
         );
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'span'), $content, $options);
     }
 
@@ -517,6 +514,7 @@ class Html extends BaseHtml
     public static function badge($content, array $options = [])
     {
         static::addCssClass($options, 'badge');
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'span'), $content, $options);
     }
 
@@ -545,12 +543,14 @@ class Html extends BaseHtml
                     ],
                     'buttons' => [
                         'tag' => 'p',
-                        'formatter' => function() use ($content) {
-                            return static::listFactory(
-                                function($items) { return static::buttonFactory($items); },
-                                ArrayHelper::popValue($content, 'buttons', [])
-                            );
-                        },
+                        'formatter' => function () use ($content) {
+                                return static::listFactory(
+                                    function ($items) {
+                                        return static::buttonFactory($items);
+                                    },
+                                    ArrayHelper::popValue($content, 'buttons', [])
+                                );
+                            },
                     ],
                 ]
             );
@@ -561,6 +561,7 @@ class Html extends BaseHtml
         }
 
         static::addCssClass($options, 'jumbotron');
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
 
@@ -594,6 +595,7 @@ class Html extends BaseHtml
         }
 
         static::addCssClass($options, 'page-header');
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
 
@@ -618,8 +620,8 @@ class Html extends BaseHtml
             [
                 'src' => '',
                 'formatter' => function ($element) {
-                    return static::img($element['src'], $element['options']);
-                },
+                        return static::img($element['src'], $element['options']);
+                    },
                 'allowEmpty' => true,
             ]
         );
@@ -641,22 +643,27 @@ class Html extends BaseHtml
                     'append' => [
                         'buttons' => [
                             'tag' => 'p',
-                            'formatter' => function() use ($content) {
-                                return static::listFactory(
-                                    function($items) { return static::buttonFactory($items); },
-                                    ArrayHelper::popValue($content, 'buttons', [])
-                                );
-                            },
+                            'formatter' => function () use ($content) {
+                                    return static::listFactory(
+                                        function ($items) {
+                                            return static::buttonFactory($items);
+                                        },
+                                        ArrayHelper::popValue($content, 'buttons', [])
+                                    );
+                                },
                         ],
                     ],
                 ]
             );
+
             static::addCssClass($caption['options'], 'caption');
+
             $content = $image . self::getRenderer()->renderElement($caption);
             $tagName = ArrayHelper::popValue($options, 'tag', 'div');
         }
 
         static::addCssClass($options, 'thumbnail');
+
         return static::tag($tagName, $content, $options);
     }
 
@@ -684,8 +691,8 @@ class Html extends BaseHtml
                         'closeButton' => [
                             'content' => '&times;',
                             'formatter' => function ($element, $content) {
-                                return static::alertCloseButton($content, $element['options']);
-                            },
+                                    return static::alertCloseButton($content, $element['options']);
+                                },
                         ],
                     ],
                 ]
@@ -699,6 +706,7 @@ class Html extends BaseHtml
             'alert',
             ArrayHelper::popValue($options, 'context', Alert::CONTEXT_SUCCESS)
         );
+
         return static::tag(ArrayHelper::popValue($options, 'tag', 'div'), $content, $options);
     }
 
@@ -732,6 +740,7 @@ class Html extends BaseHtml
     public static function closeButton($content = '&times;', array $options = [])
     {
         static::addCssClass($options, 'close');
+
         $options['aria-hidden'] = 'true';
         return static::button($content, $options);
     }
@@ -746,6 +755,7 @@ class Html extends BaseHtml
     public static function alertLink($label, $url = null, array $options = [])
     {
         static::addCssClass($options, 'alert-link');
+
         return static::a($label, $url, $options);
     }
 
@@ -767,21 +777,14 @@ class Html extends BaseHtml
      */
     public static function tag($name, $content = '', array $options = [])
     {
-        // todo: clean up this method.
         if (isset($options['icon'])) {
-            $icon = ArrayHelper::popValue($options, 'icon');
-            if (is_string($icon)) {
-                $icon = ['content' => $icon];
-            }
-            $content = static::icon($icon['content'], ArrayHelper::popValue($icon, 'options', [])) . ' ' . $content;
+            $icon = self::getRenderer()->normalizeElement(ArrayHelper::popValue($options, 'icon'));
+            $content = static::icon($icon['content'], $icon['options']) . ' ' . $content;
         }
 
         if (isset($options['badge'])) {
-            $badge = ArrayHelper::popValue($options, 'badge');
-            if (is_string($badge)) {
-                $badge = ['content' => $badge];
-            }
-            $content .= ' ' . static::badge($badge['content'], ArrayHelper::popValue($badge, 'options', []));
+            $badge = self::getRenderer()->normalizeElement(ArrayHelper::popValue($options, 'badge'));
+            $content .= ' ' . static::badge($badge['content'], $badge['options']);
         }
 
         return parent::tag($name, $content, $options);
@@ -797,15 +800,18 @@ class Html extends BaseHtml
     {
         // todo: add tests.
         //if (!is_callable($formatter)) {
-            // todo: throw exception
+        // todo: throw exception
         //}
         if (empty($items)) {
             return '';
         }
+
         $result = '';
+
         foreach ($items as $item) {
             $result .= ' ' . call_user_func($formatter, $item);
         }
+
         return $result;
     }
 
@@ -826,16 +832,22 @@ class Html extends BaseHtml
         switch (ArrayHelper::popValue($options, 'type', 'button')) {
             case Button::TYPE_LINK:
                 return static::linkTb($label, ArrayHelper::popValue($options, 'url'), $options);
+
             case Button::TYPE_SUBMIT:
                 return static::submitButtonTb($label, $options);
+
             case Button::TYPE_RESET:
                 return static::resetButtonTb($label, $options);
+
             case Button::TYPE_INPUT:
                 return static::buttonInputTb($label, $options);
+
             case Button::TYPE_INPUT_SUBMIT:
                 return static::submitInputTb($label, $options);
+
             case Button::TYPE_INPUT_RESET:
                 return static::resetInputTb($label, $options);
+
             case Button::TYPE_BUTTON:
             default:
                 return static::buttonTb($label, $options);
@@ -855,6 +867,16 @@ class Html extends BaseHtml
         if (!empty($suffix) && strpos($class, $suffix) === false) {
             $class .= '-' . $suffix;
         }
+
+        static::addCssClass($options, $class);
+    }
+
+    public static function addCssClassWithCondition(&$options, $class, $condition)
+    {
+        if (!$condition) {
+            return;
+        }
+
         static::addCssClass($options, $class);
     }
 
@@ -869,6 +891,7 @@ class Html extends BaseHtml
         if (!isset(self::$_renderer)) {
             self::$_renderer = new HtmlRenderer;
         }
+        
         return self::$_renderer;
     }
 }

@@ -18,9 +18,11 @@ class HtmlRenderer extends Component
     public function parseContent($content, array $structure = [])
     {
         $result = [];
+
         foreach ($structure as $name => $element) {
             $result[$name] = $this->parseElement($name, $content, $structure[$name]);
         }
+
         return $result;
     }
 
@@ -35,12 +37,7 @@ class HtmlRenderer extends Component
      */
     public function parseElement($name, $content, array $structure = [])
     {
-        if (isset($content[$name])) {
-            $element = is_array($content[$name]) ? $content[$name] : ['content' => $content[$name]];
-        } else {
-            $element = [];
-        }
-
+        $element = isset($content[$name]) ? $content[$name] : [];
         $element = $this->normalizeElement($element, $structure);
 
         if (!empty($structure['prepend'])) {
@@ -56,15 +53,25 @@ class HtmlRenderer extends Component
     /**
      * Normalizes the given element using the given default values.
      *
-     * @param array $element
+     * @param string|array $element
      * @param array $defaults
      *
      * @return array the normalized element.
      */
-    public function normalizeElement(array $element, array $defaults = [])
+    public function normalizeElement($element, array $defaults = [])
     {
+        if (is_string($element)) {
+            $element = ['content' => $element];
+        }
+
         return array_merge(
-            ['tag' => 'div', 'content' => '', 'options' => [], 'prepend' => [], 'append' => []],
+            [
+                'tag' => 'div',
+                'content' => '',
+                'options' => [],
+                'prepend' => [],
+                'append' => [],
+            ],
             $defaults,
             $element
         );
@@ -80,9 +87,11 @@ class HtmlRenderer extends Component
     public function renderContent(array $content)
     {
         $out = '';
+
         foreach ($content as $element) {
             $out .= $this->renderElement($element);
         }
+
         return $out;
     }
 
@@ -103,7 +112,7 @@ class HtmlRenderer extends Component
     {
         $content = $this->prepend($element['prepend']) . $element['content'] . $this->append($element['append']);
 
-        if (empty($content) && isset($element['allowEmpty']) && !$element['allowEmpty']) {
+        if (empty($content) && isset($element['allowEmpty']) && $element['allowEmpty'] === false) {
             return '';
         }
 
@@ -111,7 +120,11 @@ class HtmlRenderer extends Component
             $content = call_user_func($element['formatter'], $element, $content);
         }
 
-        return $element['tag'] !== false ? Html::tag($element['tag'], $content, $element['options']) : $content;
+        if ($element['tag'] === false) {
+            return $content;
+        }
+
+        return Html::tag($element['tag'], $content, $element['options']);
     }
 
     /**
@@ -121,7 +134,7 @@ class HtmlRenderer extends Component
      *
      * @return string
      */
-    protected function prepend($content)
+    public function prepend($content)
     {
         return !empty($content) ? $this->renderContent($content) . ' ' : '';
     }
@@ -133,7 +146,7 @@ class HtmlRenderer extends Component
      *
      * @return string
      */
-    protected function append($content)
+    public function append($content)
     {
         return !empty($content) ? ' ' . $this->renderContent($content) : '';
     }
