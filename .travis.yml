@@ -11,7 +11,7 @@ script: vendor/bin/codecept run --coverage --xml
 
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+  - php ocular.phar code-coverage:upload --format=php-clover tests/_log/coverage.xml
 
 branches:
   only:
