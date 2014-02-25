@@ -110,7 +110,7 @@ class HtmlRenderer extends Component
         }
 
         if (isset($element['formatter']) && is_callable($element['formatter'])) {
-            $content = call_user_func($element['formatter'], $content, $element);
+            $content = call_user_func($element['formatter'], $element, $content);
         }
 
         return $element['tag'] !== false ? Html::tag($element['tag'], $content, $element['options']) : $content;

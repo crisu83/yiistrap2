@@ -16,7 +16,6 @@ use yiistrap\enums\Alert;
 use yiistrap\enums\Button;
 use yiistrap\enums\Label;
 use yiistrap\enums\Nav;
-use yiistrap\helpers\ArrayHelper;
 
 /**
  * @author Christoffer Niska <christoffer.niska@gmail.com>
@@ -231,13 +230,13 @@ class Html extends BaseHtml
                                 'options' => ['class' => 'caret'],
                             ]
                         ],
-                        'formatter' => function ($content, $element) {
+                        'formatter' => function ($element) {
                             return static::dropdownToggle($element['content'], $element['options']);
                         },
                     ],
                     'menu' => [
                         'items' => [],
-                        'formatter' => function ($content, $element) {
+                        'formatter' => function ($element) {
                             return static::dropdownMenu(
                                 ArrayHelper::popValue($element, 'items', []),
                                 $element['options']
@@ -369,7 +368,7 @@ class Html extends BaseHtml
      */
     public static function breadcrumbs(array $items, array $options = [])
     {
-        $options['item'] = function ($item, $index) {
+        $options['item'] = function ($item) {
             if (is_string($item)) {
                 $item = ['content' => $item];
             }
@@ -447,7 +446,7 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    protected static function menuItem($item, $index)
+    protected static function menuItem($item)
     {
         if (is_string($item)) {
             return $item; // already rendered
@@ -541,7 +540,7 @@ class Html extends BaseHtml
                     ],
                     'buttons' => [
                         'tag' => 'p',
-                        'formatter' => function($c, $element) use ($content) {
+                        'formatter' => function() use ($content) {
                             return static::listFactory(
                                 function($items) { return static::buttonFactory($items); },
                                 ArrayHelper::popValue($content, 'buttons', [])
@@ -613,7 +612,7 @@ class Html extends BaseHtml
             $content,
             [
                 'src' => '',
-                'formatter' => function ($content, $element) {
+                'formatter' => function ($element) {
                     return static::img($element['src'], $element['options']);
                 },
                 'allowEmpty' => true,
@@ -637,7 +636,7 @@ class Html extends BaseHtml
                     'append' => [
                         'buttons' => [
                             'tag' => 'p',
-                            'formatter' => function($c, $element) use ($content) {
+                            'formatter' => function() use ($content) {
                                 return static::listFactory(
                                     function($items) { return static::buttonFactory($items); },
                                     ArrayHelper::popValue($content, 'buttons', [])
@@ -678,7 +677,7 @@ class Html extends BaseHtml
                     'prepend' => [
                         'closeButton' => [
                             'content' => '&times;',
-                            'formatter' => function ($content, $element) {
+                            'formatter' => function ($element, $content) {
                                 return static::alertCloseButton($content, $element['options']);
                             },
                         ],
@@ -745,10 +744,22 @@ class Html extends BaseHtml
     }
 
     /**
+     * @param int|array $percent
+     * @param array $options
+     *
+     * @return string
+     */
+    public static function progress($percent, array $options = [])
+    {
+        return '';
+    }
+
+    /**
      * @inheritDoc
      */
     public static function tag($name, $content = '', array $options = [])
     {
+        // todo: clean up this method.
         if (isset($options['icon'])) {
             $icon = ArrayHelper::popValue($options, 'icon');
             if (is_string($icon)) {
@@ -815,8 +826,8 @@ class Html extends BaseHtml
                 return static::submitInputTb($label, $options);
             case Button::TYPE_INPUT_RESET:
                 return static::resetInputTb($label, $options);
-            default:
             case Button::TYPE_BUTTON:
+            default:
                 return static::buttonTb($label, $options);
         }
     }
