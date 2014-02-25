@@ -47,6 +47,7 @@ class Html extends BaseHtml
         $options['formatter'] = function($label, $options) {
             return static::a($label, ArrayHelper::popValue($options, 'url'), $options);
         };
+
         return static::btn($label, $options);
     }
 
@@ -177,8 +178,9 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    protected static function btn($label, array $options = [])
+    public static function btn($label, array $options = [])
     {
+        // todo: add tests.
         if (ArrayHelper::popValue($options, 'active')) {
             static::addCssClass($options, 'active');
         }
@@ -193,9 +195,9 @@ class Html extends BaseHtml
         static::addCssClassWithSuffix($options, 'btn', ArrayHelper::popValue($options, 'block') ? 'block' : '');
 
         $formatter = ArrayHelper::popValue($options, 'formatter');
-        if (!is_callable($formatter)) {
+        //if (!is_callable($formatter)) {
             // todo: throw exception
-        }
+        //}
         return call_user_func($formatter, $label, $options);
     }
 
@@ -219,6 +221,7 @@ class Html extends BaseHtml
      */
     public static function dropdown($content, array $options = [])
     {
+        // todo: add more tests.
         if (is_array($content)) {
             $content = self::getRenderer()->parseContent(
                 $content,
@@ -277,10 +280,11 @@ class Html extends BaseHtml
      */
     public static function nav(array $items, array $options = [])
     {
+        // todo: add more tests.
         $options['item'] = function($item, $index) {
-            if (!isset($item['label'])) {
+            //if (!isset($item['label'])) {
                 // todo: throw exception
-            }
+            //}
             if (isset($item['items'])) {
                 ArrayHelper::defaultValue($item, 'content', []);
                 $item['content'] = self::getRenderer()->parseContent(
@@ -398,7 +402,7 @@ class Html extends BaseHtml
      */
     public static function pagination(array $items, array $options = [])
     {
-        $options['item'] = function ($item, $index) {
+        $options['item'] = function ($item) {
             if (!isset($item['url'])) {
                 $item['content'] = static::tag(
                     'span',
@@ -407,7 +411,7 @@ class Html extends BaseHtml
                 );
             }
 
-            return static::menuItem($item, $index);
+            return static::menuItem($item);
         };
 
         static::addCssClass($options, 'pagination');
@@ -442,12 +446,13 @@ class Html extends BaseHtml
 
     /**
      * @param string|array $item
-     * @param int $index
      *
      * @return string
      */
-    protected static function menuItem($item)
+    public static function menuItem($item)
     {
+        // todo: refactor this method (too complex).
+        // todo: add tests.
         if (is_string($item)) {
             return $item; // already rendered
         }
@@ -668,6 +673,7 @@ class Html extends BaseHtml
      */
     public static function alert($content, array $options = [])
     {
+        // todo: add more tests.
         if (is_array($content)) {
             $content = self::getRenderer()->element(
                 'body',
@@ -723,7 +729,7 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    protected static function closeButton($content = '&times;', array $options = [])
+    public static function closeButton($content = '&times;', array $options = [])
     {
         static::addCssClass($options, 'close');
         $options['aria-hidden'] = 'true';
@@ -749,10 +755,12 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    public static function progress($percent, array $options = [])
+    /*
+    public static function progress($percentage, array $options = [])
     {
         return '';
     }
+    */
 
     /**
      * @inheritDoc
@@ -785,11 +793,12 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    protected static function listFactory($formatter, array $items)
+    public static function listFactory($formatter, array $items)
     {
-        if (!is_callable($formatter)) {
+        // todo: add tests.
+        //if (!is_callable($formatter)) {
             // todo: throw exception
-        }
+        //}
         if (empty($items)) {
             return '';
         }
@@ -809,8 +818,9 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    protected static function buttonFactory(array $options)
+    public static function buttonFactory(array $options)
     {
+        // todo: add tests.
         $label = ArrayHelper::popValue($options, 'label');
 
         switch (ArrayHelper::popValue($options, 'type', 'button')) {
@@ -841,6 +851,7 @@ class Html extends BaseHtml
      */
     public static function addCssClassWithSuffix(&$options, $class, $suffix)
     {
+        // todo: add tests.
         if (!empty($suffix) && strpos($class, $suffix) === false) {
             $class .= '-' . $suffix;
         }
@@ -852,8 +863,9 @@ class Html extends BaseHtml
     /**
      * @return HtmlRenderer
      */
-    protected static function getRenderer()
+    public static function getRenderer()
     {
+        // todo: add tests.
         if (!isset(self::$_renderer)) {
             self::$_renderer = new HtmlRenderer;
         }

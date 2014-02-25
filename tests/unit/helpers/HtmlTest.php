@@ -6,6 +6,7 @@ use yiistrap\enums\Button;
 use yiistrap\enums\Icon;
 use yiistrap\enums\Label;
 use yiistrap\enums\Pagination;
+use yiistrap\enums\Progress;
 use yiistrap\helpers\Html;
 use yiistrap\tests\unit\TestCase;
 
@@ -20,19 +21,20 @@ class HtmlTest extends TestCase
     {
         $I = $this->codeGuy;
 
+        // default and active
         $html = Html::buttonTb(
             'Button',
             [
-                'context' => Button::CONTEXT_PRIMARY,
                 'size' => Button::SIZE_LG,
                 'active' => true,
             ]
         );
         $btn = $I->createNode($html, '.btn');
-        $I->seeNodeCssClass($btn, 'btn btn-primary btn-lg active');
+        $I->seeNodeCssClass($btn, 'btn btn-lg active');
         $I->dontSeeNodeCssClass($btn, 'btn-block');
         $I->seeNodeText($btn, 'Button');
 
+        // disabled and block
         $html = Html::buttonTb(
             'Button',
             [
@@ -43,6 +45,19 @@ class HtmlTest extends TestCase
         $btn = $I->createNode($html, '.btn');
         $I->seeNodeCssClass($btn, 'btn-block');
         $I->seeNodeAttribute($btn, 'disabled', 'disabled');
+
+        foreach (array(
+            Button::CONTEXT_PRIMARY,
+            Button::CONTEXT_SUCCESS,
+            Button::CONTEXT_INFO,
+            Button::CONTEXT_WARNING,
+            Button::CONTEXT_DANGER,
+            Button::CONTEXT_LINK,
+        ) as $context) {
+            $html = Html::buttonTb('Button', ['context' => $context]);
+            $btn = $I->createNode($html, '.btn');
+            $I->seeNodeCssClass($btn, 'btn-' . $context);
+        }
     }
 
     public function testIcon()
@@ -335,8 +350,10 @@ class HtmlTest extends TestCase
             $li = $I->createNode($liElement, 'li');
             if ($n === 0) {
                 $I->seeNodeCssClass($li, 'active');
-            } else if ($n === 2) {
-                $I->seeNodeCssClass($li, 'disabled');
+            } else {
+                if ($n === 2) {
+                    $I->seeNodeCssClass($li, 'disabled');
+                }
             }
             $a = $li->filter('a');
             $I->seeNodeAttribute($a, 'href', $items[$n]['url']);
@@ -522,7 +539,7 @@ class HtmlTest extends TestCase
         $I->seeNodePattern($label, '/> Inbox$/');
         $I->seeNodeChildren($label, ['.glyphicon']);
     }
-    
+
     public function testBadge()
     {
         $I = $this->codeGuy;
@@ -674,4 +691,68 @@ class HtmlTest extends TestCase
         $a = $I->createNode($html, 'a.alert-link');
         $I->seeNodeText($a, 'this important alert message');
     }
+
+    /*
+    public function testProgress()
+    {
+        $I = $this->codeGuy;
+
+        // default
+        $html = Html::progress(60);
+        $progress = $I->createNode($html, 'div.progress');
+        $bar = $progress->filter('div.progress-bar');
+        $I->seeNodeAttributes(
+            $bar,
+            [
+                'role' => 'progressbar',
+                'aria-valuenow' => '60',
+                'aria-valuemin' => '0',
+                'aria-valuemax' => '100',
+            ]
+        );
+        $I->seeNodeCssStyle($bar, 'width: 60%');
+        $span = $bar->filter('span.sr-only');
+        $I->seeNodeText($span, '60%');
+
+        // show percentage
+        $html = Html::progress(60, ['showPercentage' => true]);
+        $progress = $I->createNode($html, 'div.progress');
+        $bar = $progress->filter('div.progress-bar');
+        $I->seeNodeText($bar, '60%');
+
+        // contexts
+        foreach (array(
+            Progress::CONTEXT_SUCCESS,
+            Progress::CONTEXT_INFO,
+            Progress::CONTEXT_WARNING,
+            Progress::CONTEXT_DANGER
+        ) as $context) {
+            $html = Html::progress(60, ['context' => $context]);
+            $progress = $I->createNode($html, 'div.progress');
+            $bar = $progress->filter('div.progress-bar');
+            $I->seeNodeCssClass($bar, 'progress-bar-' . $context);
+        }
+
+        // striped
+        $html = Html::progress(60, ['striped' => true]);
+        $progress = $I->createNode($html, 'div.progress');
+        $I->seeNodeCssClass($progress, 'progress-striped');
+
+        // animated
+        $html = Html::progress(60, ['striped' => true]);
+        $progress = $I->createNode($html, 'div.progress');
+        $I->seeNodeCssClass($progress, 'progress-striped active');
+
+        // stacked
+        $html = Html::progress(
+            [
+                ['percentage' => 35, 'context' => Progress::CONTEXT_SUCCESS],
+                ['percentage' => 20, 'context' => Progress::CONTEXT_WARNING],
+                ['percentage' => 10, 'context' => Progress::CONTEXT_DANGER],
+            ]
+        );
+        $progress = $I->createNode($html, 'div.progress');
+        $I->seeNodeCssClass($progress, 'progress-striped');
+    }
+    */
 }
