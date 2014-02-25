@@ -11,3 +11,8 @@ settings:
     log: true
 coverage:
     enabled: true
+    include:
+        - components/*
+        - helpers/*
+    exclude:
+        - vendor/*
