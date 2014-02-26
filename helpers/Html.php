@@ -16,6 +16,8 @@ use yiistrap\enums\Alert;
 use yiistrap\enums\Button;
 use yiistrap\enums\Label;
 use yiistrap\enums\Nav;
+use yiistrap\exceptions\InvalidOption;
+use yiistrap\exceptions\MissingOption;
 
 /**
  * @author Christoffer Niska <christoffer.niska@gmail.com>
@@ -26,7 +28,6 @@ class Html extends BaseHtml
 {
     /**
      * @param string $label
-     * @param string|array|null $url
      * @param array $options
      * - context: string
      * - size: string
@@ -36,11 +37,10 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    public static function linkTb($label, $url = null, array $options = [])
+    public static function linkTb($label, array $options = [])
     {
         static::addCssClassWithCondition($options, 'disabled', ArrayHelper::popValue($options, 'disabled'));
 
-        $options['url'] = $url;
         $options['role'] = 'button';
         $options['formatter'] = function ($label, $options) {
             return static::a($label, ArrayHelper::popValue($options, 'url'), $options);
@@ -192,9 +192,11 @@ class Html extends BaseHtml
         static::addCssClassWithCondition($options, 'active', ArrayHelper::popValue($options, 'active'));
 
         $formatter = ArrayHelper::popValue($options, 'formatter');
-        //if (!is_callable($formatter)) {
-        // todo: throw exception
-        //}
+
+        if (!is_callable($formatter)) {
+            throw new InvalidOption('Option "formatter" must be callable.');
+        }
+
         return call_user_func($formatter, $label, $options);
     }
 
@@ -282,9 +284,9 @@ class Html extends BaseHtml
     {
         // todo: add more tests.
         $options['item'] = function ($item, $index) {
-            //if (!isset($item['label'])) {
-            // todo: throw exception
-            //}
+            if (!isset($item['label'])) {
+                throw new MissingOption('Required option "label" is not set.');
+            }
             if (isset($item['items'])) {
                 ArrayHelper::defaultValue($item, 'content', []);
 
@@ -776,6 +778,7 @@ class Html extends BaseHtml
         $defaults = ['context' => null, 'showLabel' => false];
         ArrayHelper::moveValues(array('context', 'showLabel'), $options, $defaults);
 
+        // todo: refactor this code block.
         $content = static::listFactory(function($bar) use ($defaults) {
             $bar = static::getRenderer()->normalizeElement($bar);
             ArrayHelper::copyValues(array_keys($defaults), $bar, $bar['options']);
@@ -842,12 +845,9 @@ class Html extends BaseHtml
      *
      * @return string
      */
-    public static function listFactory($formatter, array $items)
+    public static function listFactory(callable $formatter, array $items)
     {
         // todo: add tests.
-        //if (!is_callable($formatter)) {
-        // todo: throw exception
-        //}
         if (empty($items)) {
             return '';
         }
@@ -873,31 +873,23 @@ class Html extends BaseHtml
     public static function buttonFactory(array $options)
     {
         // todo: add tests.
-        $label = ArrayHelper::popValue($options, 'label');
 
-        switch (ArrayHelper::popValue($options, 'type', 'button')) {
-            case Button::TYPE_LINK:
-                return static::linkTb($label, ArrayHelper::popValue($options, 'url'), $options);
+        $map = [
+            Button::TYPE_BUTTON => 'buttonTb',
+            Button::TYPE_SUBMIT => 'submitButtonTb',
+            Button::TYPE_RESET => 'resetButtonTb',
+            Button::TYPE_INPUT_SUBMIT => 'submitInputTb',
+            Button::TYPE_INPUT_RESET => 'resetInputTb',
+            Button::TYPE_LINK => 'linkTb',
+        ];
 
-            case Button::TYPE_SUBMIT:
-                return static::submitButtonTb($label, $options);
+        $type = ArrayHelper::popValue($options, 'type', 'button');
 
-            case Button::TYPE_RESET:
-                return static::resetButtonTb($label, $options);
-
-            case Button::TYPE_INPUT:
-                return static::buttonInputTb($label, $options);
-
-            case Button::TYPE_INPUT_SUBMIT:
-                return static::submitInputTb($label, $options);
-
-            case Button::TYPE_INPUT_RESET:
-                return static::resetInputTb($label, $options);
-
-            case Button::TYPE_BUTTON:
-            default:
-                return static::buttonTb($label, $options);
+        if (!isset($map[$type])) {
+            throw new InvalidOption(sprintf('Option "type" is not valid. (%s)', $type));
         }
+
+        return static::$map[$type](ArrayHelper::popValue($options, 'label', 'Button'), $options);
     }
 
     /**
