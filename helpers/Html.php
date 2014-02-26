@@ -16,6 +16,7 @@ use yiistrap\enums\Alert;
 use yiistrap\enums\Button;
 use yiistrap\enums\Label;
 use yiistrap\enums\Nav;
+use yiistrap\enums\Navbar;
 use yiistrap\exceptions\InvalidOption;
 use yiistrap\exceptions\MissingOption;
 
@@ -176,6 +177,8 @@ class Html extends BaseHtml
      * - active: bool
      * - disabled: bool
      *
+     * @throws InvalidOption
+     *
      * @return string
      */
     public static function btn($label, array $options = [])
@@ -283,10 +286,11 @@ class Html extends BaseHtml
     public static function nav(array $items, array $options = [])
     {
         // todo: add more tests.
-        $options['item'] = function ($item, $index) {
+        $options['item'] = function ($item) {
             if (!isset($item['label'])) {
                 throw new MissingOption('Required option "label" is not set.');
             }
+
             if (isset($item['items'])) {
                 ArrayHelper::defaultValue($item, 'content', []);
 
@@ -307,7 +311,7 @@ class Html extends BaseHtml
                 $item['options']['tag'] = 'li';
                 return static::dropdown($item['content'], $item['options']);
             } else {
-                return static::menuItem($item, $index);
+                return static::menuItem($item);
             }
         };
 
@@ -353,7 +357,9 @@ class Html extends BaseHtml
     public static function dropdownMenu(array $items, array $options = [])
     {
         // todo: add support for the 'role' attribute.
-        $options['item'] = array('static', 'menuItem');
+        $options['item'] = function ($item) {
+            return static::menuItem($item);
+        };
         return static::ul($items, $options);
     }
 
@@ -368,6 +374,28 @@ class Html extends BaseHtml
         static::addCssClass($options, 'divider');
         return static::tag('li', '', $options);
     }
+
+    /**
+     * @param $content
+     * @param array $options
+     *
+     * @return string
+     */
+    public static function navbar($content, array $options = [])
+    {
+        static::addCssClass($options, 'navbar');
+        static::addCssClassWithSuffix(
+            $options,
+            'navbar',
+            ArrayHelper::popValue($options, 'color', Navbar::COLOR_DEFAULT)
+        );
+        static::addCssClassWithSuffix($options, 'navbar', ArrayHelper::popValue($options, 'position'));
+
+        $options['role'] = 'navigation';
+        return static::tag(ArrayHelper::popValue($options, 'tag', 'nav'), $content, $options);
+    }
+
+    // todo: implement navbar elements (minor)
 
     /**
      * @param array $items
@@ -433,7 +461,7 @@ class Html extends BaseHtml
     public static function pager(array $items, array $options = [])
     {
         // todo: clean up this method (if possible).
-        $options['item'] = function ($item, $index) {
+        $options['item'] = function ($item) {
             ArrayHelper::defaultValue($item, 'itemOptions', []);
 
             static::addCssClassWithCondition(
@@ -443,7 +471,7 @@ class Html extends BaseHtml
             );
             static::addCssClassWithCondition($item['itemOptions'], 'next', ArrayHelper::popValue($item, 'next'));
 
-            return static::menuItem($item, $index);
+            return static::menuItem($item);
         };
 
         static::addCssClass($options, 'pager');
@@ -769,6 +797,7 @@ class Html extends BaseHtml
      */
     public static function progress($content, array $options = [])
     {
+        // todo: refactor this method.
         if (!is_array($content)) {
             $content = [
                 ['percentage' => $content],
@@ -778,13 +807,15 @@ class Html extends BaseHtml
         $defaults = ['context' => null, 'showLabel' => false];
         ArrayHelper::moveValues(array('context', 'showLabel'), $options, $defaults);
 
-        // todo: refactor this code block.
-        $content = static::listFactory(function($bar) use ($defaults) {
-            $bar = static::getRenderer()->normalizeElement($bar);
-            ArrayHelper::copyValues(array_keys($defaults), $bar, $bar['options']);
-            ArrayHelper::defaultValues($bar['options'], $defaults);
-            return static::progressBar($bar['percentage'], $bar['options']);
-        }, $content);
+        $content = static::listFactory(
+            function ($bar) use ($defaults) {
+                $bar = static::getRenderer()->normalizeElement($bar);
+                ArrayHelper::copyValues(array_keys($defaults), $bar, $bar['options']);
+                ArrayHelper::defaultValues($bar['options'], $defaults);
+                return static::progressBar($bar['percentage'], $bar['options']);
+            },
+            $content
+        );
 
         if (ArrayHelper::popValue($options, 'animated')) {
             static::addCssClass($options, 'active');
@@ -868,6 +899,8 @@ class Html extends BaseHtml
      * - url, string|array|null
      * - options, array
      *
+     * @throws InvalidOption
+     *
      * @return string
      */
     public static function buttonFactory(array $options)
@@ -899,7 +932,7 @@ class Html extends BaseHtml
      * @param string $class
      * @param string $suffix
      */
-    public static function addCssClassWithSuffix(&$options, $class, $suffix)
+    public static function addCssClassWithSuffix(array &$options, $class, $suffix)
     {
         // todo: add tests.
         if (!empty($suffix) && strpos($class, $suffix) === false) {
@@ -909,7 +942,14 @@ class Html extends BaseHtml
         static::addCssClass($options, $class);
     }
 
-    public static function addCssClassWithCondition(&$options, $class, $condition)
+    /**
+     * Adds a CSS class to the specified options if the given condition is met.
+     *
+     * @param array $options
+     * @param string $class
+     * @param bool $condition
+     */
+    public static function addCssClassWithCondition(array &$options, $class, $condition)
     {
         if (!$condition) {
             return;

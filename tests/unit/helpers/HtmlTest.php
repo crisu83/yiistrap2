@@ -5,6 +5,7 @@ namespace yiistrap\tests\unit\helpers;
 use yiistrap\enums\Button;
 use yiistrap\enums\Icon;
 use yiistrap\enums\Label;
+use yiistrap\enums\Navbar;
 use yiistrap\enums\Pagination;
 use yiistrap\enums\Progress;
 use yiistrap\helpers\Html;
@@ -451,6 +452,30 @@ class HtmlTest extends TestCase
         $html = Html::menuDivider();
         $divider = $I->createNode($html, 'li');
         $I->seeNodeCssClass($divider, 'divider');
+    }
+
+    public function testNavbar()
+    {
+        $I = $this->codeGuy;
+
+        // default
+        $html = Html::navbar('Navbar content');
+        $navbar = $I->createNode($html, 'nav.navbar');
+        $I->seeNodeCssClass($navbar, 'navbar-default');
+        $I->seeNodeAttribute($navbar, 'role', 'navigation');
+
+        // positions
+        foreach (array(Navbar::POSITION_FIXED_TOP, Navbar::POSITION_FIXED_BOTTOM, Navbar::POSITION_STATIC_TOP) as
+            $position) {
+            $html = Html::navbar('Navbar content', ['position' => $position]);
+            $navbar = $I->createNode($html, 'nav.navbar');
+            $I->seeNodeCssClass($navbar, 'navbar-' . $position);
+        }
+
+        // inverse
+        $html = Html::navbar('Navbar content', ['color' => Navbar::COLOR_INVERSE]);
+        $navbar = $I->createNode($html, 'nav.navbar');
+        $I->seeNodeCssClass($navbar, 'navbar-inverse');
     }
 
     public function testBreadcrumbs()
