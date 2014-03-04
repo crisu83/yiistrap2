@@ -2,7 +2,7 @@
     "name": "crisu83/yiistrap2",
     "description": "Twitter Bootstrap for Yii2.",
     "keywords": ["yiistrap", "bootstrap", "yii2"],
-    "type": "yii-extension",
+    "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "authors": [
         {
